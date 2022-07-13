@@ -1,0 +1,108 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.ClubCommunityCategories
+@{
+    ViewData["Title"] = "Kategori Klub dan Komunitas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Kategori Klub dan Komunitas
+                </h2>
+                @*<ul class="header-dropdown m-r--5">
+            <li class="dropdown">
+                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li><a id="RefreshButton" href="javascript:void(0);" class="waves-effect waves-block"><i class="material-icons">refresh</i>Refresh</a></li>
+                </ul>
+            </li>
+        </ul>*@
+            </div>
+            <div class="body">
+                @{int counter  = 1;} 
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.ProductCategories>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Kategori Klub dan Komunitas Baru").HtmlAttributes(new { Href = Url.Action("Create", "ClubCategories") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read", "ClubCategories"))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy", "ClubCategories"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                       .Data("data")
+                       .Total("total")
+                       )
+                     )
+                  .Columns(columns =>
+                  {
+                      //columns.Template("<span>" + @counter++ + "</span>").Title("No.").Width(20);
+                          columns.Bound(typeof(string), "name").Title("Kategori");
+                      columns.Bound(typeof(string), "iconUrl").ClientTemplate(
+                  "#=GetMyImage(data.iconUrl)#").Width(240)
+                .Title("Ikon");
+                          columns.Bound(typeof(int), "order").Title("Urutan");
+                          columns.Bound(typeof(string), "isPublished").ClientTemplate(
+                  "#=ShowValue(data.isPublished)#").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false)
+                .Title("Tampilkan?");
+                          columns.Command(commands =>{
+                              commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "Ubah" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                              commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                              //commands.Custom("Ubah").Click("goToEditPage");
+                              //commands.Custom("Ubah Attachment").Click("goToAttachmentPage");
+                              //commands.Destroy().Text("Hapus");
+                          }).Width(200).Title("Aksi");
+                      })
+                   .Pageable()
+                   .Sortable()
+                )
+
+                <script>
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "ClubCategories")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

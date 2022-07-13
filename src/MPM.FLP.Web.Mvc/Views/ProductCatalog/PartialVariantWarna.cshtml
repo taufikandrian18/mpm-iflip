@@ -1,0 +1,36 @@
+﻿@model MPM.FLP.FLPDb.ProductCatalogs
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="body">
+            @using (Html.BeginForm("CreateVarianWarna", "ProductCatalog", FormMethod.Post))
+            {
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Nama Varian</label><br />
+                    <input asp-for="Title" class="k-textbox" style="width:100%" />
+                    <input asp-for="Id" hidden />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PanjangLebarTinggi">Kode Hex</label><br />
+                    @(Html.Kendo().ColorPicker()
+                        .Name("picker")
+                        .Value("#ffffff")
+                    )
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Image </label>
+                    <br />
+                    @(Html.Kendo().Upload()
+                        .Name("files")
+                        .Multiple(false)
+                        .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                    )
+                </div>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary">Buat</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

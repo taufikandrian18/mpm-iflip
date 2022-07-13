@@ -1,0 +1,111 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.RolePlays
+@{
+    ViewData["Title"] = "Roleplay";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Roleplay @Model.Title Dealer
+                </h2>
+            </div>
+            <div class="body">
+                <div class="form-group">
+                    <button id="backToHwQuiz" class="btn btn-primary" onclick="BackToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+                    <button id="downloadBtn" class="btn btn-success" onclick="DownloadAllExcel()">Download Excel</button>
+                    @*<button id="importExcel" class="btn btn-warning" onclick="ImportExcel('@Model.Id')">Import Excel</button>*@
+                    @*<button id="importBtn" class="btn btn-warning" onclick="ImportExcel()">Import Excel</button>
+        <button id="templateBtn" class="btn btn-info pull-right" onclick="TemplateExcel()">Download Template</button>
+        <button id="downloadBtn" class="btn btn-success" onclick="DownloadExcel()">Download Excel</button>*@
+                    @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                    @*<button asp-action="Index" class="btn btn-default">Kembali</button>*@
+                </div>
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.RolePlayAssignments>()
+                              .Name("grid")
+                              //.ToolBar(tools =>
+                              //{
+                              //    tools.Custom().Text("Tambah Detail Baru").HtmlAttributes(new { Href = Url.Action("CreateDetail", "Roleplay", Model) });
+                              //})
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Dealer_Read", "Roleplay", Model))
+                                                //.Destroy(destroy => destroy.Action("Grid_Detail_Destroy", "Roleplay"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                  .Data("data")
+                  .Total("total")
+                  )
+                )
+                .Columns(columns =>
+                {
+                     columns.Bound(typeof(string), "kodeDealerMPM").Title("Kode MPM").Filterable(true);
+                     columns.Bound(typeof(string), "namaDealer").Title("Nama Dealer").Filterable(true);
+                     columns.Command(commands =>
+                     {
+                         commands.Custom("Result").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "Result" }).IconClass("glyphicon glyphicon-book").Click("GoToResultPage");
+                         //commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                     }).Title("Aksi");
+                })
+                  .Pageable()
+                  .Sortable()
+                  .Scrollable()
+                  .Resizable(resize => resize.Columns(true))
+                  .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function GoToResultPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Result", "Roleplay")' + '/' + dataItem.id;
+                    }
+                    function DownloadExcel(e) {
+
+                        window.location.href = '@Url.Action("DownloadDetail", "Roleplay",Model)';
+                    }
+
+                    function DownloadAllExcel(e) {
+                        window.location.href = '@Url.Action("DownloadAllExcel", "Roleplay")' + '/' + '@Model.Id';
+                    }
+
+                    function ImportExcel(e) {
+                        window.location.href = '@Url.Action("ImportExcel", "Roleplay")' + '/' + '@Model.Id';
+                    }
+
+                    function TemplateExcel(e) {
+                        window.location.href = '@Url.Action("DownloadTemplate", "Roleplay", Model)';
+                    }
+                    
+                    function BackToIndex() {
+                       window.location.href = '@Url.Action("Index", "Roleplay")';
+                    };
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

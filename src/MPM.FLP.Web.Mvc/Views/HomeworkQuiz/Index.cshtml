@@ -1,0 +1,139 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.HomeworkQuizzes
+@{
+    ViewData["Title"] = "HomeworkQuiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Homework Quiz
+                </h2>
+            </div>
+            <div class="body">
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.HomeworkQuizzes>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Homework Quiz Baru").HtmlAttributes(new { Href = Url.Action("Create", "HomeworkQuiz") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read", "HomeworkQuiz"))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy", "HomeworkQuiz"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                         .Data("data")
+                         .Total("total")
+                         )
+                       )
+                    .Columns(columns =>
+                    {
+                        columns.Bound(typeof(string), "title").Title("Judul").Width(200).Lockable(false).Locked(true).Filterable(true);
+                        columns.Bound(typeof(string), "featuredImageUrl").ClientTemplate("#=GetMyImage(data.featuredImageUrl)#").Title("Gambar").Width(100).Filterable(false);
+                        columns.Bound(typeof(int), "totalQuestion").Title("Jumlah Pertanyaan").Width(150).Filterable(false);
+                         columns.Bound(typeof(int), "minimalScore").Title("Minimum Skor").Width(150).Filterable(false);
+                        columns.Bound(typeof(string), "duration").Title("Durasi (Detik)").Width(130).Filterable(false);
+                        columns.Bound(typeof(DateTime), "startDate").Title("Tanggal Mulai").ClientTemplate("#= data.startDate ? kendo.toString(kendo.parseDate(data.startDate), 'dd-MM-yyyy') : '' #").Width(120).Filterable(false);
+                        columns.Bound(typeof(DateTime), "endDate").Title("Tanggal Berakhir").ClientTemplate("#= data.endDate ? kendo.toString(kendo.parseDate(data.endDate), 'dd-MM-yyyy') : '' #").Width(140).Filterable(false);
+                        columns.Template("<button class='btn btn-primary waves-effect' onclick='goToQuestionPage(\"#=data.id#\")'><span>Manage</span></button>").Title("Manage Question").Width(150);
+                        columns.Template("<button class='btn btn-primary waves-effect' onclick='goToUserPage(\"#=data.id#\")'><span>Assign</span></button>").Title("Assignment").Width(120);
+                        columns
+              .Bound(x=>x.Id).ClientTemplate("<div class='dropdown text-center'> " +
+                  "<button class='btn btn-default dropdown-toggle' type='button' id='menu1' data-toggle='dropdown'> <span class='glyphicon glyphicon-th-list'></span> " +
+                    "<span class='caret'></span> " +
+                  "</button>" +
+                  "<ul class='dropdown-menu ' role='menu' aria-labelledby='menu1' style='position: relative;z-index:11000;cursor:pointer;'>"+
+                    "<li role='presentation'><a id='spesifikasiBtn' role='menuitem' tabindex='-1' onclick='goToHwQuizScore(\"#=data.id#\");'>Score</a></li>" +
+                    "<li role='presentation'><a id='spesifikasiBtn' role='menuitem' tabindex='-1' onclick='downloadScore(\"#=data.id#\");'>Report</a></li></ul>"+
+              "</div>").Title("Manajemen").Width(120);
+                   //     columns.Bound(typeof(string), "isAlreadyTaken").ClientTemplate(
+                  //"#=ShowValue(data.isAlreadyTaken)#")
+                //.Title("Status").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100).Filterable(false);
+                        columns.Bound(typeof(string), "isPublished").ClientTemplate(
+                  "#=ShowValue(data.isPublished)#")
+                .Title("Tampilkan?").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100).Filterable(false);
+                        columns.Command(commands =>                                 {
+                            commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                            commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus"}).IconClass("glyphicon glyphicon-trash");
+                        }).Width(180);
+                    })
+                 .Pageable()
+                 .Sortable()
+                 .Scrollable()
+                 .Resizable(resize => resize.Columns(true))
+                 .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function goToQuestionPage(e) {
+                            window.location.href = '@Url.Action("HomeworkQuestion", "HomeworkQuiz")' + '/' + e;
+                    }
+                    function goToUserPage(e) {
+                            window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")' + '/' + e;
+                    }
+                    function goToHwQuizScore(e) {
+                            window.location.href = '@Url.Action("HwQuizScore", "HomeworkQuiz")' + '/' + e;
+                    }
+                    function downloadScore(e) {
+                            window.location.href = '@Url.Action("DownloadScore", "HomeworkQuiz")' + '/' + e;
+                    }
+                    
+                    function goToAttachmentPage(e) {
+                            e.preventDefault();
+                            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                            window.location.href = '@Url.Action("EditAttachment", "HomeworkQuiz")' + '/' + dataItem.id;
+                    }
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "HomeworkQuiz")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found'; 
+
+                            //just checking to see if we have a name for the image 
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }    
+                </script>
+                
+            </div>
+        </div>
+    </div>
+</div>
+

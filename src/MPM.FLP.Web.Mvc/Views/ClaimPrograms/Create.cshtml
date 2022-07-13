@@ -1,0 +1,252 @@
+﻿@model MPM.FLP.Web.Models.FLPMPM.ClaimProgramCreateVM
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Claim Program Baru</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("Create", "ClaimPrograms", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Title" class="control-label">Judul</label><br />
+                                <input asp-for="Title" id="txtTitle" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Contents" class="control-label">Deskripsi</label> <br />
+                                @(Html.Kendo().EditorFor(e => e.Contents)
+                                    .HtmlAttributes(new { style = "width:100%; height:440px" })
+                                    .Tools(tools => tools
+                                      .Clear()
+                                      .Bold().Italic().Underline().Strikethrough()
+                                      .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+                                      .InsertUnorderedList().InsertOrderedList()
+                                      .Outdent().Indent()
+                                      //.Formatting()
+                                      //.CleanFormatting()
+                                      .FontName()
+                                      .FontSize()
+                                      .ForeColor().BackColor()
+                                  )
+                                )
+                                @Html.ValidationMessageFor(model => model.Contents)
+                                <span asp-validation-for="Contents" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> Gambar </label>
+                                <br />
+                                @(Html.Kendo().Upload()
+                                    .Name("images")
+                                    .Multiple(true)
+                                    .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                                )
+                                @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> Dokumen </label>
+                                <br />
+                                @(Html.Kendo().Upload()
+                                    .Name("files")
+                                    .Multiple(true)
+                                    .Validation(validation => validation.AllowedExtensions(new string[] { ".pdf", ".doc", ".docx" }))
+                                )
+                                @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> Video </label>
+                                <br />
+                                @(Html.Kendo().Upload()
+                                    .Name("videos")
+                                    .Multiple(true)
+                                    .Validation(validation => validation.AllowedExtensions(new string[] { ".mp4" }))
+                                )
+                                @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="StartDate" class="control-label">Tanggal Mulai</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.StartDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                                )
+                                @*<kendo-datepicker for="StartDate" value="@DateTime.Now" id="dateStart" />*@
+                                @*<input asp-for="StartDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="EndDate" class="control-label">Tanggal Berakhir</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.EndDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                                )
+                                @*<kendo-datepicker for="EndDate" value="@DateTime.Now" id="dateEnd" />*@
+                                @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="IsH3" class="control-label">Is H3</label>
+                                <div class="checkbox">
+                                    <div class="switch">
+                                        <label>No<input asp-for="IsH3" type="checkbox" checked=""><span class="lever"></span>Yes</label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="IsH3" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="IsH3Ahass" class="control-label">Is H3 Ahass</label>
+                                <div class="checkbox">
+                                    <div class="switch">
+                                        <label>No<input asp-for="IsH3Ahass" type="checkbox" checked=""><span class="lever"></span>Yes</label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="IsH3Ahass" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="IsPublished" class="control-label">Tampilkan ?</label>
+                                <div class="checkbox">
+                                    <div class="switch">
+                                        <label>OFF<input asp-for="IsPublished" type="checkbox" checked=""><span class="lever"></span>ON</label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="IsPublished" class="text-danger"></span>
+                            </div>
+
+                            <br /><br />
+
+                            <div class="form-group">
+                                <label asp-for="IsDoku" class="control-label">Doku ?</label>
+                                <div class="checkbox">
+                                    <div class="switch">
+                                        <label>No<input asp-for="IsDoku" id="dokuCheck" type="checkbox" checked=""><span class="lever"></span>Yes</label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="IsPublished" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="DokuReward" class="control-label">Doku Reward</label><br />
+                                <input type="number" asp-for="DokuReward" min="0" id="txtDokuReward" class="k-textbox" style="width:100%" />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="NonDokuReward" class="control-label">Non Doku Reward</label><br />
+                                <input asp-for="NonDokuReward" id="txtNonDokuReward" class="k-textbox" style="width:100%" />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Tambah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+                @*<div class="form-group">
+                        <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                        <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                    </div>*@
+            </div>
+            <div class="footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "ClaimPrograms", Model)';
+        });
+
+    });
+
+   
+    $(document).ready(function () {
+
+        $("#dokuCheck").change(function () {
+
+            if ($("#dokuCheck").is(":checked")) {
+                document.getElementById('txtNonDokuReward').disabled = this.checked;
+                document.getElementById('txtDokuReward').disabled = !this.checked;
+
+                if (document.getElementById('txtNonDokuReward').disabled) {
+                    document.getElementById('txtNonDokuReward').value = "";
+                }
+            } else {
+                document.getElementById('txtDokuReward').disabled = !this.checked;
+                document.getElementById('txtNonDokuReward').disabled = this.checked;
+
+                if (document.getElementById('txtDokuReward').disabled) {
+                    document.getElementById('txtDokuReward').value = "";
+                }
+            }
+            
+        })
+
+        if ($("#dokuCheck").is(":checked")) {
+            document.getElementById('txtDokuReward').disabled = this.checked;
+            document.getElementById('txtNonDokuReward').disabled = !this.checked;
+        }
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();
+
+            var startDate = $("#StartDate").val();
+            var endDate = $("#EndDate").val();
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert("Tanggal mulai tidak bisa lebih dari tanggal akhir");
+                abp.ui.clearBusy();
+            } else {
+                abp.ui.setBusy();
+                var formdata = new FormData($('#formCreate').get(0));
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Create", "ClaimPrograms")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        alert("Data berhasil dimasukkan");
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Index", "ClaimPrograms")';
+                    }
+                });
+            }
+
+            
+
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "ClaimPrograms")';
+        //window.history.back();
+    };
+
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

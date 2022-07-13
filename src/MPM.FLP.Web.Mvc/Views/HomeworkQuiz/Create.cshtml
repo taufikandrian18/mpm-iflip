@@ -1,0 +1,162 @@
+﻿@model MPM.FLP.FLPDb.HomeworkQuizzes
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Homework Quiz Baru</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("Create", "HomeworkQuiz", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Title" class="control-label">Judul</label><br />
+                                <input asp-for="Title" id="txtTitle" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="TotalQuestion" class="control-label">Jumlah Pertanyaan</label><br />
+                                <input type="number" min="0" asp-for="TotalQuestion" id="txtIncentive" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Duration" class="control-label">Durasi (Detik)</label><br />
+                                <input type="number" min="0" asp-for="Duration" id="txtIncentive" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="MinimalScore" class="control-label">Minimal Score</label><br />
+                                <input type="number" min="0" asp-for="MinimalScore" id="txtMinScore" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="StartDate" class="control-label">Tanggal Mulai</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.StartDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                                )
+                                @*<kendo-datepicker for="StartDate" value="@DateTime.Now" id="dateStart" />*@
+                                @*<input asp-for="StartDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="EndDate" class="control-label">Tanggal Berakhir</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.EndDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                                )
+                                @*<kendo-datepicker for="EndDate" value="@DateTime.Now" id="dateEnd" />*@
+                                @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> Gambar </label>
+                                <br />
+                                @(Html.Kendo().Upload()
+                                    .Name("images")
+                                    .Multiple(false)
+                                    .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                                )
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="IsPublished" class="control-label">Tampilkan ?</label>
+                                <div class="checkbox">
+                                    <div class="switch">
+                                        <label>OFF<input asp-for="IsPublished" type="checkbox" checked=""><span class="lever"></span>ON</label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="IsPublished" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Tambah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+                    
+                </div>
+                @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "HomeworkQuiz", Model)';
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+
+            var formdata = new FormData($('#formCreate').get(0)); 
+            var title = $("#txtTitle").val();
+            var startDate = $("#StartDate").val();
+            var endDate = $("#EndDate").val();
+
+            if (title.trim() == "") {
+                alert("Judul masih kosong");
+                abp.ui.clearBusy();
+            } else
+            if (new Date(startDate) > new Date(endDate)) {
+                alert("Tanggal mulai tidak bisa lebih dari tanggal akhir");
+                abp.ui.clearBusy();
+            } else
+            {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Create", "HomeworkQuiz")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false, 
+                    contentType: false, 
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Index", "HomeworkQuiz")';
+                    }   
+                });  
+                
+            }
+                
+        }); 
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "HomeworkQuiz")';
+        //window.history.back();
+    };
+
+    
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

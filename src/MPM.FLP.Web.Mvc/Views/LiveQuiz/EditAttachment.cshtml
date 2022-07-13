@@ -1,0 +1,246 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.SalesIncentivePrograms
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Sales Incentive Programs Attachment</h2>
+            </div>
+            <div class="body">
+                <!--Form Image-->
+                <form asp-action="EditAttachment">
+                    @if ((string)TempData["success"] != "" && TempData["success"] != null)
+                    {
+                        <div class="alert bg-green alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            @TempData["success"]
+                        </div>
+                    }
+                    @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                    {
+                        <div class="alert bg-red alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            @TempData["alert"]
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label class="control-label">Tambah gambar baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("images")
+                            .Multiple(true)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                    @(Html.Kendo().Grid<MPM.FLP.FLPDb.SalesIncentiveProgramAttachments>()
+                            .Name("gridImage")
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                             .Read(read => read.Action("GridAttachmentImage_Read", "SalesIncentivePrograms", Model))
+                                             .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "SalesIncentivePrograms", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                     .Model(m =>
+                                             {
+                                         m.Id("id");
+                                     })
+                                     .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                   .Data("data")
+                   .Total("total")
+               )
+       )
+       .Columns(columns =>
+       {
+           columns.Bound(typeof(string), "title").Title("Judul");
+           columns.Bound(typeof(string), "storageUrl").ClientTemplate(
+           "#=GetMyImage(data.storageUrl)#").Width(240)
+           .Title("Image");
+           columns.Command(commands =>
+           {
+               commands.Destroy().Text("Hapus");
+           }).Width(250);
+       })
+                    )
+                </form>
+
+                <br />
+                <!--Form Document-->
+                <form asp-action="EditAttachment">
+                    @if (!string.IsNullOrEmpty(ViewBag.resultDocument))
+                    {
+                        <div class="alert bg-cyan alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            @ViewBag.resultDocument
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label class="control-label">Tambah dokumen baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("documents")
+                            .Multiple(true)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".pdf", ".doc", ".docx" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                    @(Html.Kendo().Grid<MPM.FLP.FLPDb.SalesIncentiveProgramAttachments>()
+                            .Name("gridDocument")
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                             .Read(read => read.Action("GridAttachmentDocument_Read", "SalesIncentivePrograms", Model))
+                                             .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "SalesIncentivePrograms", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                     .Model(m =>
+                                             {
+                                         m.Id("id");
+                                         m.Field("title", typeof(string));
+                                         m.Field("storageUrl", typeof(string));
+                                         m.Field("salesTalkId", typeof(string));
+                                     })
+                                     .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                                     .Data("data")
+                                     .Total("total")
+                                 )
+                         )
+                         .Columns(columns =>
+                         {
+                             columns.Bound(typeof(string), "title").Title("Judul");
+                             columns.Bound(typeof(string), "storageUrl").Title("Dokumen").Width(240);
+                             columns.Command(commands =>
+                             {
+                                 commands.Destroy().Text("Hapus");
+                             }).Width(250);
+                         })
+                    )
+                </form>
+
+                <br />
+                <!--Form Image-->
+                <form asp-action="EditAttachment">
+                    @if (!string.IsNullOrEmpty(ViewBag.resultVideo))
+                    {
+                        <div class="alert bg-cyan alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            @ViewBag.resultVideo
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label class="control-label">Tambah video baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("videos")
+                            .Multiple(true)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".mp4" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                    @(Html.Kendo().Grid<MPM.FLP.FLPDb.SalesIncentiveProgramAttachments>()
+                            .Name("gridVideo")
+                            .Scrollable()
+                            .Resizable(resize => resize.Columns(false))
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                             .Read(read => read.Action("GridAttachmentVideo_Read", "SalesIncentivePrograms", Model))
+                                             .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "SalesIncentivePrograms", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                     .Model(m =>
+                                             {
+                                         m.Id("id");
+                                         m.Field("title", typeof(string));
+                                         m.Field("storageUrl", typeof(string));
+                                         m.Field("salesTalkId", typeof(string));
+                                     })
+                                     .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                             .Data("data")
+                             .Total("total")
+                         )
+                 )
+                 .Columns(columns =>
+                 {
+                     columns.Bound(typeof(string), "title").Title("Judul").Width(200);
+                     columns.Bound(typeof(string), "storageUrl").Title("Video");
+                     columns.Command(commands =>
+                     {
+                         commands.Destroy().Text("Hapus");
+                     }).Width(250);
+                 })
+                    )
+                </form>
+            </div>
+        </div>
+        
+        <script>
+            function GetMyImage(image)
+            {
+                var returnString = 'No Image Found';
+
+                // just checking to see if we have a name for the image
+                if (image != null && image.length > 0) {
+                    returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    return returnString;
+                } else
+                    return "";
+            }        
+
+        </script>
+    </div>
+</div>
+
+<script>
+
+    $(function() {
+        // The Name() of the Grid is used to get its client-side instance.
+        var SalesTalkAttachments = $("#SalesTalkAttachments").data("kendoGrid");
+    });
+
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

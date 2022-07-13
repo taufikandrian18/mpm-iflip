@@ -1,0 +1,819 @@
+﻿@model MPM.FLP.FLPDb.HomeworkQuizzes
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<div id="tabstrip">
+    <ul id="tabItem">
+        <li class="k-state-active">
+            <p><b>Assign user pada @Model.Title</b></p>
+        </li>
+        <li id="assignedID">
+            <p id="assignedLabel"><b>User Assigned</b></p>
+        </li>
+    </ul>
+    <div class="row">
+        <div class="header">
+            <input type="button" id="btnAssignAll" value="Assign all user to @Model.Title" class="btn btn-lg btn-success" />
+            <button class="btn btn-info pull-right" onclick="backToIndex()">Kembali</button>
+        </div>
+        <hr />
+        <div class="body">
+            <h4 class="control-label">Filter</h4>
+            <br />
+            @using (Html.BeginForm("Create", "Inbox", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+            {
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <label class="control-label">Channel</label><br />
+                @(Html.Kendo().DropDownList()
+                                  .Name("channel")
+                                  .OptionLabel("Pilih Semua Channel...")
+                                  .BindTo(new List<string>() {
+                                      "",
+                                      "H1",
+                                      "H2"
+                                  })
+                                 .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                <br /><br />
+                <label class="control-label">Kota</label><br />
+                @(Html.Kendo().DropDownList()
+                                    .Name("kota")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("Pilih Kota")
+                                    .DataTextField("kota")
+                                    .DataValueField("kota")
+
+                                    .DataSource(source =>
+                                            source.Custom()
+                                               .ServerFiltering(true)
+                                               .Type("aspnetmvc-ajax")
+                                               .Transport(transport => transport
+                                                    .Read(read =>
+                                                    {
+                                                        read.Action("Cascading_Get_Kota", "HomeworkQuiz");
+                                                    })
+                                               )
+                                               .Schema(schema => schema
+                                                    .Data("data")
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id("kota");
+                                                        model.Field("kota", typeof(string));
+                                                    })
+                                                    .Parse(@<text>
+                                                                function(response) {
+                                                                return response.result;
+                                                                }
+                                                    </text>)
+
+                                               )
+
+                                        ).SelectedIndex(1)
+                                )
+                <br /><br />
+                <label class="control-label">Jabatan</label><br />
+                @(Html.Kendo().DropDownList()
+                                    .Name("jabatan")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("Pilih Semua Jabatan...")
+                                    .DataTextField("idgroupjabatan")
+                                    .DataValueField("idgroupjabatan")
+                                    .DataSource(source =>
+                                            source.Custom()
+                                               .ServerFiltering(true)
+                                               .Type("aspnetmvc-ajax")
+                                               .Transport(transport => transport
+                                                    .Read(read =>
+                                                    {
+                                                        read.Action("Cascading_Get_Jabatan", "HomeworkQuiz").Data("filterChannel");
+                                                    })
+                                               )
+                                               .Schema(schema => schema
+                                                    .Data("data")
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id("idgroupjabatan");
+                                                        model.Field("idgroupjabatan", typeof(string));
+                                                    })
+                                                    .Parse(@<text>
+                                                                function(response) {
+                                                                return response.result;
+                                                                }
+                                                    </text>)
+                                      )
+                                 )
+                                 .Enable(false)
+                                 .AutoBind(false)
+                                 .CascadeFrom("channel")
+                                )
+
+                <br /><br />
+                <label class="control-label">Dealer</label><br />
+                @(Html.Kendo().DropDownList()
+                                    .Name("dealer")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("Pilih Semua Dealer...")
+                                    .DataValueField("dealer")
+                                    .Filter(FilterType.Contains)
+                                    .TemplateId("dealer-item-template")
+                                    .ValueTemplateId("dealer-item-template")
+                                    .DataSource(source =>
+                                            source.Custom()
+                                               .ServerFiltering(true)
+                                               .Type("aspnetmvc-ajax")
+                                               .Transport(transport => transport
+                                                    .Read(read =>
+                                                    {
+                                                        read.Action("Cascading_Get_Dealer", "HomeworkQuiz").Data("filterKota");
+                                                    })
+                                               )
+                                               .Schema(schema => schema
+                                                    .Data("data")
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id("dealer");
+                                                        model.Field("dealer", typeof(string));
+
+                                                    })
+                                                    .Parse(@<text>
+                                                                function(response) {
+                                                                return response.result;
+                                                                }
+                                                    </text>)
+                                      )
+                                 ).CascadeFrom("kota")
+
+                                )
+
+                <br /><br />
+                <button type="button" id="btn_getUser" value="Search User" class="btn btn-primary pull-right">Search User</button>
+                <br /><br />
+                <hr />
+                <div class="form-group">
+                    <h4 class="pull-left" style="margin-right:10px !important;">List User</h4>
+                    <button type="button" id="btnAssignCheckedUser" value="AssignUser" class="btn btn-primary pull-left"><span class="k-icon k-i-check-circle"></span> Assign All</button>
+                    <h6 id="labelSelectedUser" class="pull-left" style="margin-left:10px !important; color:#1f91f3;"></h6>
+                    <input type="text" class="k-textbox  pull-right" id='searchBox' placeholder='Search by Nama' />
+                </div>
+                <div class="form-group has-feedback">
+
+                    @*<label class="control-label">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </label><br />*@
+                </div>
+                <br /><br /><br />
+                @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.InternalUsersVM>()
+                             .Name("grid")
+                             .Columns(columns =>
+                             {
+                                 columns.Select().Width(50);
+                                 columns.Bound(typeof(string), "").ClientTemplate("#= renderNumber(data) #").Title("No");
+                                 columns.Bound(typeof(string), "idmpm").Title("ID MPM");
+                                 columns.Bound(typeof(string), "nama").Title("Nama User");
+                                 columns.Bound(typeof(string), "channel").Title("Channel");
+                                 columns.Bound(typeof(string), "jabatan").Title("Jabatan");
+                                 columns.Bound(typeof(string), "dealerKota").Title("Kota");
+                                 columns.Bound(typeof(string), "dealerName").Title("Dealer");
+                                 columns.Template("<button class='btn btn-primary waves-effect' onclick='assignID(\"#=data.idmpm#\",\"#=data.nama#\")'><span>Assign</span></button>").Title("Action");
+
+                             })
+                             .Events(ev => ev.DataBound("onDataBound"))
+                             .Pageable()
+                             .Sortable()
+                             )
+            }
+            @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+        </div>
+        <div class="footer">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="header">
+            <input type="button" id="btnRemoveAll" value="Remove all user from @Model.Title" class="btn btn-lg btn-warning" />
+            <button class="btn btn-info pull-right" onclick="backToIndex()">Kembali</button>
+        </div>
+        <hr />
+        <div class="body">
+            
+            <div class="form-group has-feedback">
+                <h4 class="pull-left" style="margin-right:10px !important;">List Assigned User</h4>
+                <button type="button" id="btnRemoveCheckedUser" value="AssignUser" class="btn btn-danger pull-left"><span class="k-icon k-i-check-circle"></span> Remove All</button>
+                <h6 id="labelRemoveSelectedUser" class="pull-left" style="margin-left:10px !important; color:#fb483a"></h6>
+                <input type="text" class="k-textbox  pull-right" id='searchBox2' placeholder='Search by Nama' />
+                @*<label class="control-label">
+            <i class="glyphicon glyphicon-search"></i>
+        </label><br />*@
+            </div>
+            <br /><br /> <br />
+            @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.InternalUsersVM>()
+                             .Name("grid2")
+                             .Columns(columns =>
+                             {
+                                 columns.Select().Width(50);
+                                 columns.Bound(typeof(string), "").ClientTemplate("#= renderNumber(data) #").Title("No");
+                                 columns.Bound(typeof(string), "idmpm").Title("ID MPM");
+                                 columns.Bound(typeof(string), "nama").Title("Nama User");
+                                 columns.Bound(typeof(string), "channel").Title("Channel");
+                                 columns.Bound(typeof(string), "jabatan").Title("Jabatan");
+                                 columns.Bound(typeof(string), "dealerKota").Title("Kota");
+                                 columns.Bound(typeof(string), "dealerName").Title("Dealer");
+                                 columns.Template("<button class='btn btn-danger waves-effect' onclick='removeID(\"#=data.idmpm#\",\"#=data.nama#\")'><span>Remove</span></button>").Title("Action");
+
+                             })
+                             .Events(ev => ev.DataBound("onDataBound"))
+                             .Pageable()
+                             .Sortable()
+                             )
+            <div class="form-group">
+                <div id="grid3"></div>
+                @*<input type='text' id='searchBox' class='k-textbox' placeholder='search by id mpm' /><span class="glyphicon-search"></span><br /><br />*@
+
+                @*@(Html.Kendo().ListBox()
+                                    .Name("optional")
+                                    .ConnectWith("selected")
+                                    .DataTextField("idmpm")
+                                    .DataValueField("idmpm")
+                                    .TemplateId("user-item-template")
+                                    .HtmlAttributes(new { style = "width:400px; height:400px" })
+                                    .Selectable(ListBoxSelectable.Multiple)
+                                     .Draggable(true)
+                                     .DropSources("selected")
+                                     .Toolbar(toolbar =>
+                                     {
+                                         toolbar.Tools(tools => tools
+                                             .MoveUp()
+                                             .MoveDown()
+                                             .TransferTo()
+                                             .TransferFrom()
+                                             .TransferAllTo()
+                                             .TransferAllFrom()
+                                             .Remove());
+                                     })
+                                     .BindTo(new List<MPM.FLP.Web.Models.FLPMPM.InternalUsersVM>())
+                                )
+                    @(Html.Kendo().ListBox()
+                                    .Name("selected")
+                                    .DataTextField("nama")
+                                    .DataValueField("idmpm")
+                                    .TemplateId("user-item-template")
+                                    .HtmlAttributes(new { style = "width:400px; height:400px" })
+                                    .Draggable(true)
+                                    .Selectable(ListBoxSelectable.Multiple)
+                                    .DropSources("optional")
+                                    .BindTo(new List<MPM.FLP.Web.Models.FLPMPM.InternalUsersVM>())
+                                )*@
+
+            </div>
+
+            @*<div class="form-group">
+                    <input type="submit" id="btnSubmit" value="Ubah" class="btn btn-primary" />
+                    <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                </div>*@
+
+        </div>
+    </div>
+</div>
+<script id="user-item-template" type="text/x-kendo-template">
+    <span class="k-state-default">(#: data.idGroupJabatan #) #: data.idmpm # - #: data.nama # </span>
+</script>
+<script id="dealer-item-template" type="text/x-kendo-template">
+    <span class="k-state-default">#: data.kode # - #: data.dealer #</span>
+</script>
+<script>
+
+
+    function assignID(id,nama) {
+        abp.ui.setBusy();
+                            var listInternalUser = [];
+                            listInternalUser.push({ Idmpm:id, nama:nama});
+
+                            console.log(listInternalUser);
+
+                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedUser: listInternalUser
+                                            };
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("InsertUser", "HomeworkQuiz")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            abp.ui.clearBusy();
+                                            alert(response.result.message);
+                                             window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+
+                                        }
+                            });
+
+
+                        }
+
+                        function removeID(id,nama) {
+                            //alert(id + nama);
+                            abp.ui.setBusy();
+                             var listInternalUser = [];
+                            listInternalUser.push({ Idmpm:id, nama:nama});
+
+                            console.log(listInternalUser);
+
+                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedUser: listInternalUser
+                                            };
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("RemoveUser", "HomeworkQuiz")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            abp.ui.clearBusy();
+                                            alert(response.result.message);
+                                             window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+                                            //insertRecipient(response.result.message);
+                                            //console.log(response);
+                                        }
+                                    });
+
+
+                        }
+
+
+                                    var counter = 1;
+
+                                    function onDataBound(e) {
+                                        counter = 1;
+                                    }
+
+                                    function renderNumber(data) {
+                                        return counter++;
+
+                                    }
+
+                                    function filterKota() {
+                                        return {
+                                            kota: $("#kota").val()
+                                        };
+                                    }
+                                    function filterChannel() {
+                                        return {
+                                            channel: $("#channel").val()
+                                        };
+                                    }
+
+                                    $(document).ready(function () {
+
+                                        var parameter = {
+                                            id: "@Model.Id"
+                                        };
+
+                                       
+
+                                        $.ajax({
+                                                    type: "POST",
+                                                    url: '@Url.Action("GetCountAssignedUser", "HomeworkQuiz")',
+                                                    data: parameter,
+                                            success: function (response) {
+                                                var userCount = response.result;
+                                                document.getElementById('assignedLabel').innerHTML = '<b>User Assigned (' + userCount + ')</b>';
+                                                    }
+                                                });
+
+                                        //alert(document.getElementById('assignedLabel').innerText);
+
+                                        var grid = $('#grid').data('kendoGrid');
+                                        var grid2 = $('#grid2').data('kendoGrid');
+
+                                        grid.table.on("click", ".k-checkbox", selectRow);
+                                        grid2.table.on("click", ".k-checkbox", selectRowRemove);
+                                        //alert(grid.table.on("click",".k-header .k-checkbox", selectRow));
+
+                                        $("#btnAssignAll").bind("click", function () {
+                                            abp.ui.setBusy();
+                                                var parameter = {
+                                                    id: "@Model.Id"
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: '@Url.Action("InsertAllUser", "HomeworkQuiz")',
+                                                    data: parameter,
+                                                    success: function (response) {
+                                                        //code omitted for brevity
+                                                        abp.ui.clearBusy();
+                                                        alert(response.result.message);
+                                                        window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+                                                        //insertRecipient(response.result.message);
+                                                        //console.log(response);
+                                                    }
+                                                });
+                                        });
+
+                                        $("#btnAssignCheckedUser").bind("click", function () {
+
+                                            var listInternalUser = [];
+                                            abp.ui.setBusy();
+                                                for (var i in assignUsercheckedIds) {
+                                                    if (assignUsercheckedIds[i]) {
+
+                                                        listInternalUser.push({ Idmpm: i, nama: "" });
+                                                    }
+                                                }
+                                                //alert(listInternalUser);
+
+                                                var parameter = {
+                                                    id: "@Model.Id",
+                                                    selectedUser: listInternalUser
+                                            };
+
+                                            if (listInternalUser.length == 0) {
+                                                alert("Tidak ada user yang dipilih")
+                                                abp.ui.clearBusy();
+                                            }
+                                            else {
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: '@Url.Action("InsertUser", "HomeworkQuiz")',
+                                                    data: parameter,
+                                                    success: function (response) {
+                                                        //code omitted for brevity
+                                                        abp.ui.clearBusy();
+                                                        alert(response.result.message);
+                                                        window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+                                                        //insertRecipient(response.result.message);
+                                                        //console.log(response);
+                                                    }
+                                                });
+                                            }
+                                        });
+
+
+                                        $("#btnRemoveCheckedUser").bind("click", function () {
+                                            abp.ui.setBusy();
+                                            var listInternalUser = [];
+                                            for (var i in removeUsercheckedIds) {
+                                                if (removeUsercheckedIds[i]) {
+
+                                                    listInternalUser.push({ Idmpm: i, nama: "" });
+                                                }
+                                            }
+                                            //alert(checked);
+
+                                             var parameter = {
+                                                id : "@Model.Id",
+                                                 selectedUser: listInternalUser
+                                            };
+                                            if (listInternalUser.length == 0) {
+                                                alert("Tidak ada user yang dipilih")
+                                                abp.ui.clearBusy();
+                                            }
+                                            else {
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: '@Url.Action("RemoveUser", "HomeworkQuiz")',
+                                                    data: parameter,
+                                                    success: function (response) {
+                                                        //code omitted for brevity
+                                                        abp.ui.clearBusy();
+                                                        alert(response.result.message);
+                                                        window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+                                                        //insertRecipient(response.result.message);
+                                                        //console.log(response);
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        $("#btnRemoveAll").bind("click", function () {
+                                            abp.ui.setBusy();
+                                                var parameter = {
+                                                    id: "@Model.Id"
+                                                };
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: '@Url.Action("RemoveAllUser", "HomeworkQuiz")',
+                                                    data: parameter,
+                                                    success: function (response) {
+                                                        //code omitted for brevity
+                                                        abp.ui.clearBusy();
+                                                        alert(response.result.message);
+                                                        window.location.href = '@Url.Action("AssignUser", "HomeworkQuiz")';
+                                                        //insertRecipient(response.result.message);
+                                                        //console.log(response);
+                                                    }
+                                                });
+                                        });
+
+                                        var assignUsercheckedIds = {};
+                                        var removeUsercheckedIds = {};
+
+                                        function selectRow() {
+                                            var checked = this.checked,
+                                                row = $(this).closest("tr"),
+                                                grid = $("#grid").data("kendoGrid"),
+                                                dataItem = grid.dataItem(row);
+
+                                            assignUsercheckedIds[dataItem.id] = checked;
+                                            if (checked) {
+                                                document.getElementById('labelSelectedUser').innerHTML = 'You have selected all user';
+                                                //-select the row
+                                                //row.addClass("k-state-selected");
+                                            } else {
+                                                document.getElementById('labelSelectedUser').innerHTML = '';
+                                                //-remove selection
+                                                //row.removeClass("k-state-selected");
+                                            }
+                                        }
+
+                                        function selectRowRemove() {
+                                            var checked = this.checked,
+                                                row = $(this).closest("tr"),
+                                                grid = $("#grid2").data("kendoGrid"),
+                                                dataItem = grid.dataItem(row);
+                                            console.log(dataItem);
+                                            removeUsercheckedIds[dataItem.idmpm] = checked;
+                                            if (checked) {
+                                                //-select the row
+                                                //row.addClass("k-state-selected");
+                                                document.getElementById('labelRemoveSelectedUser').innerHTML = 'You have selected all user';
+                                            } else {
+                                                document.getElementById('labelRemoveSelectedUser').innerHTML = '';
+                                                //-remove selection
+                                                //row.removeClass("k-state-selected");
+                                            }
+                                        }
+
+                                        $('#grid .k-grid-header .k-checkbox').change(function (ev) {
+                                            var checked = ev.target.checked;
+                                            if (checked) {
+
+
+                                                $('#grid .k-checkbox').each(function (idx, item) {
+                                                    if (checked) {
+                                                        //$(item).click();
+                                                        if (!($(item).closest('tr').is('.k-state-selected'))) {
+                                                            $(item).click();
+                                                        }
+                                                    } else {
+                                                        //$(item).click();
+                                                        if ($(item).closest('tr').is('.k-state-selected')) {
+
+                                                            $(item).click();
+
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                //document.getElementById('labelSelectedUser').innerHTML = '';
+                                                assignUsercheckedIds = {};
+                                            }
+                                        });
+
+                                        $('#grid2 .k-grid-header .k-checkbox').change(function (ev) {
+                                            var checked = ev.target.checked;
+                                            if (checked) {
+
+
+                                                $('#grid2 .k-checkbox').each(function (idx, item) {
+                                                    if (checked) {
+                                                        //$(item).click();
+                                                        if (!($(item).closest('tr').is('.k-state-selected'))) {
+                                                            $(item).click();
+                                                        }
+                                                    } else {
+                                                        //$(item).click();
+                                                        if ($(item).closest('tr').is('.k-state-selected')) {
+
+                                                            $(item).click();
+
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                removeUsercheckedIds = {};
+                                            }
+                                        });
+
+
+                                        $("#searchBox").on("input",function(e) {
+                                            //var listBox = $("#optional").getKendoListBox();
+                                            var grid = $("#grid").getKendoGrid();
+                                            var searchString = $(this).val();
+                                            console.log();
+                                            grid.dataSource.filter({ field: "nama", operator: "contains", value: searchString });
+                                            //listBox.dataSource.filter({ field: "searchIdmpm", operator: "contains", value: searchString });
+                                        });
+
+                                        $("#searchBox2").on("input", function (e) {
+
+                                            var grid2 = $("#grid2").getKendoGrid();
+                                            var searchString = $(this).val();
+                                            console.log();
+                                            grid2.dataSource.filter({ field: "nama", operator: "contains", value: searchString });
+                                        });
+
+                                        var id = {
+                                            id: "@Model.Id"
+                                        };
+
+                                        $("#assignedID").bind("click", function () {
+                                            abp.ui.setBusy();
+                                           $.ajax({
+                                            url: "@Url.Action("Get_Assigned_User","HomeworkQuiz")",
+                                            data: id,
+                                            type: 'GET',
+                                            success: function (response) {
+                                                var userList = response.result;
+                                                var dataSource = new kendo.data.DataSource({ data: userList, pageSize: 10 });
+                                                grid2.setDataSource(dataSource);
+                                                grid2.dataSource.read();
+
+                                                abp.ui.clearBusy();
+                                               },
+                                            error: function (response) {
+                                            }
+                                           })
+                                        });
+
+
+
+
+
+                                        var InternalUser = kendo.data.Model.define({
+                                            id: "idmpm",
+                                            fields: {
+                                                "nama": {
+                                                    type: "string"
+                                                }
+                                            }
+                                        });
+
+                                        $("#btn_getUser").click(function () {
+                                            abp.ui.setBusy();
+                                            var parameter = {
+                                                //page: 1,
+                                                //limit: 50,
+                                                kota: $("#kota").val(),
+                                                dealer: $("#dealer").val(),
+                                                channel: $("#channel").val(),
+                                                jabatan: $("#jabatan").val(),
+                                                id: "@Model.Id"
+                                            };
+
+
+
+                                            //if (parameter.kota == null || parameter.kota == "") {
+                                            //    abp.ui.clearBusy();
+                                            //    alert("Kota belum dipilih");
+                                            //}
+                                            //else {
+                                            $.ajax({
+                                                url: "@Url.Action("Get_User","HomeworkQuiz")",
+                                                data: parameter,
+                                                type: 'GET',
+                                                success: function (response) {
+                                                    if (response.result.length > 0) {
+                                                        var userList = response.result;
+                                                        var dataSource = new kendo.data.DataSource({ data: userList, pageSize: 10 });
+                                                        grid.setDataSource(dataSource);
+                                                        grid.dataSource.read();
+                                                        //userList.forEach(insertUser);
+                                                        abp.ui.clearBusy();
+                                                    } else {
+                                                        alert("Data tidak ditemukan");
+                                                    }
+
+                                                },
+                                                error: function (response) {
+                                                }
+                                            })
+
+
+
+                                        });
+
+                                        function removeUser() {
+                                            var items = optional.items();
+                                            for (var i = 0; i < items.length; i++) {
+                                                optional.remove(items[i]);
+        Model                                   }
+
+                                        }
+
+                                        function insertUser(item, index) {
+                                            optional.add(new InternalUser({
+                                                idmpm: item.idmpm,
+                                                nama: item.nama,
+                                                idGroupJabatan: item.idGroupJabatan,
+                                                searchIdmpm: item.idmpm.toString()
+                                            }));
+
+                                        }
+                                        function insertAssignedUser(item, index) {
+                                            selected.add(new InternalUser({
+                                                idmpm: item.idmpm,
+                                                nama: item.nama,
+                                                idGroupJabatan: item.idGroupJabatan
+                                            }));
+                                        }
+
+                                        function insertGrid(item, index) {
+                                            //kendoGrid.setDataSource(item);
+                                            //kendoGrid.refresh();
+                                        }
+
+                                    });
+
+</script>
+<style>
+    #tabstrip {
+        color: #000000;
+        background-color: #fff
+    }
+
+    #tabItem li:active {
+        background-color: #1f91f3;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#tabstrip").kendoTabStrip({
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+    });
+
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "Inbox", Model)';
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();
+
+            var formdata = new FormData($('#formCreate').get(0));
+
+            //var selected = $('#selected').data('kendoListBox').dataItems();
+
+            var selectedGrid = $('#grid').data('kendoGrid').dataItems();
+
+            @*var listInternalUser = [];
+
+                $.each(selected, function (key, value) {
+                    listInternalUser.push({
+                        Idmpm: value.idmpm, nama: value.nama
+                    });
+                });
+
+                var parameter = {
+                    id : "@Model.Id",
+                    selectedUser: listInternalUser
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InsertUser", "HomeworkQuiz")',
+                    data: parameter,
+                    success: function (response) {
+                        //code omitted for brevity
+                        alert(response.result.message);
+                        //insertRecipient(response.result.message);
+                        //console.log(response);
+                    }
+                });*@
+
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "HomeworkQuiz")';
+        //window.history.back();
+    };
+
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

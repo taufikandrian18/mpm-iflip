@@ -1,0 +1,104 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.SPDCMasterPoints
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Point</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+                
+                @using (Html.BeginForm("Edit", "MasterPoints", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label">Judul</label><br />
+                        <input asp-for="Title" id="txtTitle" class="k-textbox" style="width:100%" required />
+                        <input asp-for="Id" hidden />
+                        <input asp-for="CreatorUsername" hidden />
+                        <input asp-for="CreationTime" hidden />
+                        @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Weight" class="control-label">Bobot Poin</label><br />
+                        <input asp-for="Weight" type="number" min="0" step="0.01" max="1" class="k-textbox" style="width:100%" required/><br />
+                        <label class="control-label">Total poin sekarang : @TempData["total"]</label><br />
+                        <span asp-validation-for="Weight" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" id="btnSubmit" value="Ubah" class="btn btn-primary" />
+                        <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                    </div>
+                }
+            </div>
+        
+        <script>
+            function backToIndex() {
+                window.location.href = '@Url.Action("Index", "MasterPoints")';
+            }
+             $(document).ready(function () {
+
+                $('form').submit(function (event) {
+
+                    event.preventDefault();            
+
+                    var formdata = new FormData($('#formCreate').get(0)); 
+                    var title = $("#txtTitle").val();
+
+                    if (title.trim() == "") {
+                        alert("Judul masih kosong");
+                        abp.ui.clearBusy();
+                    } else
+                    {
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("Edit", "MasterPoints")',
+                            data: formdata,
+                            dataType: "json",
+                            processData: false, 
+                            contentType: false, 
+                            success: function (response) {
+                                if (response.result.success) {
+                                    abp.ui.clearBusy();
+                                    window.location.href = '@Url.Action("Index", "MasterPoints")';
+                                } else {
+                                    alert("Total nilai melebihi nilai 1");
+                                    abp.ui.clearBusy();
+                                }
+                                
+                            }   
+                        });  
+                
+                    }
+                
+                }); 
+
+            });     
+
+        </script>
+    </div>
+</div>
+
+<script>
+
+    $(function() {
+        // The Name() of the Grid is used to get its client-side instance.
+        var SalesTalkAttachments = $("#SalesTalkAttachments").data("kendoGrid");
+    });
+
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

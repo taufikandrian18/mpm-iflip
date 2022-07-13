@@ -1,0 +1,111 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.VerifikasiJabatans
+@{
+    ViewData["Title"] = "HomeworkQuiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Soal Verifikasi Jabatan @Model.Title
+                </h2>
+            </div>
+            
+            <div class="body">
+                <div class="form-group">
+                    <button id="backToHwQuiz" class="btn btn-primary" onclick="backToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+                    <button id="importExcel" class="btn btn-warning" onclick="importExcel('@Model.Id')">Import Excel</button>
+                    <button id="templateBtn" class="btn btn-info" onclick="downloadTemplate()">Download Template</button>
+
+                    @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                    @*<button asp-action="Index" class="btn btn-default">Kembali</button>*@
+                </div>
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.VerifikasiJabatanQuestions>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Pertanyaan Verifikasi Jabatan Baru").HtmlAttributes(new { Href = Url.Action("CreateQuestion", "VerifikasiJabatans", new { id = Model.Id }) });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("GridQuestion_Read", "VerifikasiJabatans", Model))
+                                                .Destroy(destroy => destroy.Action("GridQuestion_Destroy", "VerifikasiJabatans"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+           .Data("data")
+           .Total("total")
+           )
+         )
+      .Columns(columns =>
+      {
+          columns.Bound(typeof(string), "question").Title("Pertanyaan");
+          columns.Bound(typeof(string), "imageUrl").ClientTemplate(
+                      "#=GetMyImage(data.imageUrl)#")
+                    .Title("Gambar");
+          columns.Bound(typeof(string), "optionA").Title("Opsi A");
+          columns.Bound(typeof(string), "optionB").Title("Opsi B");
+          columns.Bound(typeof(string), "optionC").Title("Opsi C");
+          columns.Bound(typeof(string), "optionD").Title("Opsi D");
+          columns.Bound(typeof(string), "optionE").Title("Opsi E");
+          columns.Bound(typeof(string), "correctOption").Title("Jawaban");
+          columns.Command(commands =>
+                                                     {
+              commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditQuestionPage");
+              commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+          }).Width(250);
+      })
+   .Pageable()
+   .Sortable()
+                )
+
+                <script>
+
+                    function goToEditQuestionPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("EditQuestion", "VerifikasiJabatans")' + '/' + dataItem.id;
+                    }
+                    function downloadTemplate(e) {
+
+                        window.location.href = '@Url.Action("DownloadTemplate", "VerifikasiJabatans")';
+                    }
+                    function importExcel(e) {
+
+                        window.location.href = '@Url.Action("ImportExcel", "VerifikasiJabatans")' + '/' + e;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }
+                    function backToIndex() {
+                       window.location.href = '@Url.Action("Index", "VerifikasiJabatans")';
+                        //window.history.back();
+                    };
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

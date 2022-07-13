@@ -1,0 +1,209 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@{
+    ViewData["Title"] = "Katalog";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Katalog
+                </h2>
+                @*<ul class="header-dropdown m-r--5">
+            <li class="dropdown">
+                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li><a id="RefreshButton" href="javascript:void(0);" class="waves-effect waves-block"><i class="material-icons">refresh</i>Refresh</a></li>
+                </ul>
+            </li>
+        </ul>*@
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <button type="button" class="btn btn-primary btn-circle pull-left" data-toggle="modal" data-target="#katalogBaruModal"><span class="glyphicon glyphicon-plus"></span></button>
+                        
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="searchKatalog" class="form-control pull-right" style="width:200px; margin-left:20px" placeholder="Search" />
+                    </div>
+                </div>
+                <div class="row table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr class="text-uppercase">
+                                <th>No</th>
+                                <th>Judul</th>
+                                <th>Kategori</th>
+                                <th>Urutan</th>
+                                <th>Image</th>
+                                <th>Action</th>
+                                <th>Tampilkan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. </td>
+                                <td>Judul panduan</td>
+                                <td>katalog</td>
+                                <td>0</td>
+                                <td><img class="media-object" src="http://placehold.it/64x64" width="64" height="64"></td>
+                                <td>
+                                    <button class="btn btn-primary waves-effect"><span class="glyphicon glyphicon-cog"></span><span style="margin-left:10px;">Kelola</span></button>
+                                    <button class="btn btn-default waves-effect" style="margin-left:10px"><span class="glyphicon glyphicon-pencil"></span><span style="margin-left:10px">Edit</span></button>
+                                    <button class="btn btn-danger waves-effect" style="margin-left:10px"><span class="glyphicon glyphicon-trash"></span><span style="margin-left:10px">Delete</span></button>
+                                </td>
+                                <td>
+                                    <div class="switch panel-switch-btn">
+                                        <label><input type="checkbox" id="realtime" checked><span class="lever switch-col-cyan"></span></label>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            @*@foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.FullName</td>
+                        <td>@user.EmailAddress</td>
+                        <td><i class="material-icons" style="color:@(user.IsActive ? "green":"red");">@(user.IsActive ? "check_box" : "indeterminate_check_box")</i></td>
+                        <td class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <i class="material-icons">menu</i>
+                            </a>
+                            <ul class="dropdown-menu pull-right">
+                                <li><a href="#" class="waves-effect waves-block edit-user" data-user-id="@user.Id" data-toggle="modal" data-target="#UserEditModal"><i class="material-icons">edit</i>@L("Edit")</a></li>
+                                <li><a href="#" class="waves-effect waves-block delete-user" data-user-id="@user.Id" data-user-name="@user.UserName"><i class="material-icons">delete_sweep</i>@L("Delete")</a></li>
+                            </ul>
+                        </td>
+                    </tr>
+                }*@
+                        </tbody>
+                    </table>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        <br />
+                        <table>
+                            <tr>
+                                <td>Show</td>
+                                <td width="60px">
+                                    <select name="DataTables_Table_0_length" aria-controls="DataTables_Table_0" class="form-control">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </td>
+                                <td> of 50 Entries</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-sm-4">
+                        <ul class="pagination">
+                            <li class="paginate_button previous disabled" id="DataTables_Table_0_previous"><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="0" tabindex="0">Previous</a></li>
+                            <li class="paginate_button active"><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="1" tabindex="0">1</a></li>
+                            <li class="paginate_button "><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="2" tabindex="0">2</a></li>
+                            <li class="paginate_button "><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="3" tabindex="0">3</a></li>
+                            <li class="paginate_button "><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="4" tabindex="0">4</a></li>
+                            <li class="paginate_button "><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="5" tabindex="0">5</a></li>
+                            <li class="paginate_button "><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="6" tabindex="0">6</a></li>
+                            <li class="paginate_button next" id="DataTables_Table_0_next"><a href="#" aria-controls="DataTables_Table_0" data-dt-idx="7" tabindex="0">Next</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="katalogBaruModal" tabindex="-1" role="dialog" aria-labelledby="katalogModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span>Membuat Katalog Baru</span>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <form name="katalogCreateForm" role="form" novalidate class="form-validation">
+                    <ul class="nav nav-tabs tab-nav-right" role="tablist">
+                        <li role="presentation" class="active"><a href="#create-katalog-details" data-toggle="tab">Detail</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane animated fadeIn active" id="create-panduan-layanan">
+                            <div class="row clearfix" style="margin-top:10px;">
+                                <div class="col-sm-12">
+                                    <div class="form-group form-float">
+                                        <div class="form-line">
+                                            <input class="form-control" type="text" name="judul" required minlength="2">
+                                            <label class="form-label">Judul</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row clearfix" style="margin-top:10px;">
+                                <div class="col-sm-12">
+                                    <div class="form-group form-float">
+                                        <div class="form-line">
+                                            <input class="form-control" type="text" name="kategori" required minlength="2">
+                                            <label class="form-label">Kategori</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row clearfix" style="margin-top:10px;">
+                                <div class="col-sm-12">
+                                    <div class="form-group form-float">
+                                        <div class="form-line">
+                                            <input class="form-control" type="text" name="urutan" required minlength="2">
+                                            <label class="form-label">Urutan</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row clearfix" style="margin-top:10px;">
+                                <div class="col-sm-12">
+                                    <div class="form-group form-float">
+                                        <div class="form-line">
+                                            <label class="custom-file-label">Image</label>
+                                            <div class="custom-file">
+                                                <input class="custom-file-input" type="file" accept="image/*" name="image" value="Upload">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane animated fadeIn" id="create-user-roles">
+                            <div class="row">
+                                <div class="col-sm-12 ">
+                                    @*@foreach (var role in Model.Roles)
+                                    {
+                                        <div class="col-sm-6">
+                                            <input type="checkbox" name="role" value="@role.NormalizedName" title="@role.Description" class="filled-in" id="role-@role.Id" />
+                                            <label for="role-@role.Id" title="@role.DisplayName">@role.Name</label>
+                                        </div>
+                                    }*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">@L("Cancel")</button>
+                        <button type="submit" class="btn btn-primary waves-effect">@L("Save")</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,109 @@
+﻿@model MPM.FLP.FLPDb.CSChampionClubRegistrations
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>CS Champion Clubs Registration</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("UpdateRegistration", "CSChampionClubs", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Year" class="control-label">Tahun</label><br />
+                                <input asp-for="Year" type="number" min="0" class="k-textbox" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="StartDate" class="control-label">Tanggal Mulai</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.StartDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(Model.StartDate)
+                                )
+                                @*<kendo-datepicker for="StartDate" value="@DateTime.Now" id="dateStart" />*@
+                                @*<input asp-for="StartDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="EndDate" class="control-label">Tanggal Akhir</label>
+                                <br />
+                                @(Html.Kendo().DatePickerFor(e => e.EndDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(Model.EndDate)
+                                )
+                                @*<kendo-datepicker for="StartDate" value="@DateTime.Now" id="dateStart" />*@
+                                @*<input asp-for="StartDate" type="date" class="form-control" />*@
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Update" class="btn btn-primary" />
+                                @*<input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">*@
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+                @*<div class="form-group">
+                        <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                        <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                    </div>*@
+            </div>
+            <div class="footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();
+
+            abp.ui.setBusy();
+
+                var formdata = new FormData($('#formCreate').get(0));
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateRegistration", "CSChampionClubs")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Registration", "CSChampionClubs")';
+                    }
+                });
+
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "Roleplay")';
+        //window.history.back();
+    };
+
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

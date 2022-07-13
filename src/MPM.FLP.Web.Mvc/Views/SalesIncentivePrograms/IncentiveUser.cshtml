@@ -1,0 +1,144 @@
+﻿@model MPM.FLP.Web.Models.FLPMPM.IncentiveUserVM
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card" style="height:100%">
+            <div class="header">
+                <h2>Assign @Model.Title ke H1 User</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        @using (Html.BeginForm("InsertIncentiveUser", "SalesIncentivePrograms", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div class="form-group">
+                                <input asp-for="Id" hidden />
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label class="control-label">Kota</label>
+                                        <br />
+                                        <br />
+                                        <div>
+                                            <ul>
+                                                @for (var i = 0; i < Model.ListKota.Count; i++)
+                                                {
+                                                    <li>
+                                                        <input type="hidden" asp-for="@Model.ListKota[i].Id" />
+                                                        <input type="hidden" asp-for="@Model.ListKota[i].NamaKota" />
+                                                        <input type="checkbox" asp-for="@Model.ListKota[i].isChecked" />
+                                                        <label asp-for="@Model.ListKota[i].isChecked">@Model.ListKota[i].NamaKota</label>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label class="control-label">Jabatan</label>
+                                        <br />
+                                        <br />
+                                        <div>
+                                            <ul>
+                                                @for (var i = 0; i < Model.ListJabatan.Count; i++)
+                                                {
+                                                    <li>
+                                                        <input type="hidden" asp-for="@Model.ListJabatan[i].Id" />
+                                                        <input type="hidden" asp-for="@Model.ListJabatan[i].NamaJabatan" />
+                                                        <input type="checkbox" asp-for="@Model.ListJabatan[i].isChecked" />
+                                                        <label asp-for="@Model.ListJabatan[i].isChecked">@Model.ListJabatan[i].NamaJabatan</label>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label class="control-label">Jabatan</label>
+                                        <br />
+                                        <br />
+                                        <div>
+                                            <ul>
+                                                @for (var i = 0; i < Model.ListJabatan.Count; i++)
+                                                {
+                                                    <li>
+                                                        <input type="hidden" asp-for="@Model.ListJabatan[i].Id" />
+                                                        <input type="hidden" asp-for="@Model.ListJabatan[i].NamaJabatan" />
+                                                        <input type="checkbox" asp-for="@Model.ListJabatan[i].isChecked" />
+                                                        <label asp-for="@Model.ListJabatan[i].isChecked">@Model.ListJabatan[i].NamaJabatan</label>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Tambah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+                    
+                </div>
+                @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "SalesIncentivePrograms", Model)';
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+
+            abp.ui.setBusy();
+
+            var formdata = new FormData($('#formCreate').get(0)); 
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("InsertIncentiveUser", "SalesIncentivePrograms")',
+                data: formdata,
+                dataType: "json",
+                processData: false, 
+                contentType: false, 
+                success: function (response) {
+                    alert("Data berhasil ditambahkan");
+                    abp.ui.clearBusy();
+                    window.location.href = '@Url.Action("Index", "SalesIncentivePrograms")';
+                }
+            });     
+        }); 
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "SalesIncentivePrograms")';
+        //window.history.back();
+    };
+
+    
+</script>
+
+
+

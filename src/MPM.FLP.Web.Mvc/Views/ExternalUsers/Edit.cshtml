@@ -1,0 +1,129 @@
+﻿@model MPM.FLP.Services.Dto.ExternalUserDto
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Kategori Apparel</h2>
+            </div>
+            <div class="body">
+                @if (!string.IsNullOrEmpty(ViewBag.message))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @ViewBag.message
+                    </div>
+                }
+                @using (Html.BeginForm("EditExternal", "ExternalUsers", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="AbpUserId" class="control-label">User Id</label><br />
+                        <input asp-for="AbpUserId" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="AbpUserId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label">Nama</label><br />
+                        <input asp-for="Name" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="IsActive" class="control-label">Aktif ?</label>
+                        <div class="checkbox">
+                            <div class="switch">
+                                <label>OFF<input asp-for="IsActive" type="checkbox" value="true"><span class="lever"></span>ON</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="IsKTPVerified" class="control-label">Verifikasi KTP </label>
+                        <div class="checkbox">
+                            <div class="switch">
+                                <label>False<input asp-for="IsKTPVerified" type="checkbox" value="true"><span class="lever"></span>True</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IsKTPVerified" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ShopName" class="control-label">Nama Toko</label><br />
+                        <input asp-for="ShopName" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="ShopName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Address" class="control-label">Alamat</label><br />
+                        <textarea asp-for="Address" class="k-textbox" style="width:100%" readonly></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Channel" class="control-label">Channel</label><br />
+                        <input asp-for="Channel" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="Channel" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Handphone" class="control-label">No. Handphone</label><br />
+                        <input asp-for="Handphone" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="Handphone" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label">E-mail</label><br />
+                        <input asp-for="Email" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Jabatan" class="control-label">Jabatan</label><br />
+                        <input asp-for="Jabatan" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="Jabatan" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" id="btnSubmit" value="Perbaharui" class="btn btn-primary" />
+                        <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                    </div>
+                }
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+            abp.ui.setBusy();
+            var formdata = new FormData($('#formCreate').get(0)); 
+            $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("EditExternal", "ExternalUsers")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false, 
+                    contentType: false, 
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Index", "ExternalUsers")';
+                    }   
+                });  
+                
+        }); 
+
+    });
+    function backToIndex() {
+        window.history.back();
+    }
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

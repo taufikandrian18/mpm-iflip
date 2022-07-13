@@ -1,0 +1,118 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.SalesIncentivePrograms
+@{
+    ViewData["Title"] = "SalesIncentivePrograms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Sales Incentive Programs
+                </h2>
+            </div>
+            <div class="body">
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.SalesIncentivePrograms>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Sales Incentive Program Baru").HtmlAttributes(new { Href = Url.Action("Create", "SalesIncentivePrograms") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read", "SalesIncentivePrograms"))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy", "SalesIncentivePrograms"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                         .Data("data")
+                         .Total("total")
+                         )
+                       )
+                    .Columns(columns =>
+                    {
+                         columns.Bound(typeof(string), "title").Title("Nama").Filterable(true);
+                         columns.Bound(typeof(int), "readingTime").Title("Minimal Waktu Baca").Filterable(false);
+                         columns.Bound(typeof(long), "viewCount").Title("Jumlah Pembaca").Filterable(false);
+                         columns.Bound(typeof(string), "featuredImageUrl").ClientTemplate(
+                                    "#=GetMyImage(data.featuredImageUrl)#")
+                                  .Title("Gambar").Filterable(false);
+                        columns.Bound(typeof(DateTime), "creationTime").Title("Tanggal").ClientTemplate("#= data.creationTime ? kendo.toString(kendo.parseDate(data.creationTime), 'dd-MM-yyyy') : '' #").Width(120).Filterable(false);
+                        columns.Bound(typeof(string), "creatorUsername").Title("Pembuat").Filterable(true);
+                        columns.Bound(typeof(string), "tipeMotor").Title("Tipe Motor").Filterable(true);
+                        columns.Bound(typeof(string), "incentive").Title("Incentive").Filterable(false);
+                        columns.Bound(typeof(string), "isPublished").ClientTemplate(
+                  "#=ShowValue(data.isPublished)#")
+                .Title("Tampilkan?").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false);
+                        columns.Template("<button class='btn btn-primary waves-effect' onclick='goToUserPage(\"#=data.id#\")'><span>Assign User</span></button>").Width(40);
+                        columns.Command(commands =>                                 {
+                            commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                            commands.Custom("Attachment").Text(" ").HtmlAttributes(new { @class = "btn btn-warning", @style = "color:white;", @title = "Tautan" }).IconClass("glyphicon glyphicon-file").Click("goToAttachmentPage");
+                            commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus"}).IconClass("glyphicon glyphicon-trash");
+                        }).Width(250);
+                    })
+                 .Pageable()
+                 .Sortable()
+                 .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function goToUserPage(e) {
+                            window.location.href = '@Url.Action("IncentiveUser", "SalesIncentivePrograms")' + '/' + e;
+                    }
+                    function goToAttachmentPage(e) {
+                            e.preventDefault();
+                            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                            window.location.href = '@Url.Action("EditAttachment", "SalesIncentivePrograms")' + '/' + dataItem.id;
+                    }
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "SalesIncentivePrograms")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found'; 
+
+                            //just checking to see if we have a name for the image 
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }    
+                </script>
+                
+            </div>
+        </div>
+    </div>
+</div>
+

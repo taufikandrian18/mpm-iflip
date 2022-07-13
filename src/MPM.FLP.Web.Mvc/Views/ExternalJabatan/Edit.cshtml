@@ -1,0 +1,55 @@
+﻿@model MPM.FLP.FLPDb.ExternalJabatans
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit External Jabatan</h2>
+            </div>
+            <div class="body">
+                @if (!string.IsNullOrEmpty(ViewBag.message))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        Success
+                    </div>
+                }
+                <form id="form" asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input asp-for="CreatorUsername" hidden />
+                    <input asp-for="CreationTime" hidden />
+                    <div class="form-group">
+                        <label asp-for="Nama" class="control-label">Nama Jabatan</label><br />
+                        <input type="text" asp-for="Nama" class="k-textbox" style="width:100%" required />
+                        <span asp-validation-for="Nama" class="text-danger"></span>
+                    </div>
+                </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Perbaharui</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.history.back();
+        //window.history.back();
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

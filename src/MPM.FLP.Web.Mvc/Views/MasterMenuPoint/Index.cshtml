@@ -1,0 +1,118 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.PointConfigurations
+@{
+    ViewData["Title"] = "ClaimPrograms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Master Menu Point
+                </h2>
+            </div>
+            <div class="body">
+                @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.PointConfigurationVM>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Menu Baru").HtmlAttributes(new { Href = Url.Action("Create", "MasterMenuPoint") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                        .Read(read => read.Action("Grid_Read", "MasterMenuPoint"))
+                                        .Destroy(destroy => destroy.Action("Grid_Destroy", "MasterMenuPoint"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                         .Data("data")
+                         .Total("total")
+                         )
+                       )
+                    .Columns(columns =>
+                    {
+                        columns.Bound(typeof(string), "contentType").Title("Content Type").Width(200).Filterable(true);
+                        columns.Bound(typeof(string), "activityType").Title("Activity Type").Width(150).Filterable(false);
+                        columns.Bound(typeof(int), "defaultPoint").Title("Default Point").Width(150).Filterable(false);
+                        columns.Bound(typeof(int), "defaultThreshold").Title("Default Threshold").Width(150).Filterable(false);
+                        columns.Bound(typeof(int), "activePoint").Title("Active Point").Width(150).Filterable(false);
+                        columns.Bound(typeof(DateTime), "effDateFrom").Title("Start Date").ClientTemplate("#= data.effDateFrom ? kendo.toString(kendo.parseDate(data.effDateFrom), 'dd-MM-yyyy') : '' #").Width(150).Filterable(false);
+                        columns.Bound(typeof(DateTime), "effDateTo").Title("End Date").ClientTemplate("#= data.effDateTo ? kendo.toString(kendo.parseDate(data.effDateTo), 'dd-MM-yyyy') : '' #").Width(150).Filterable(false);
+                        columns.Template("<button class='btn btn-primary waves-effect' onclick='goToDetailPage(\"#=data.id#\")'><span>Detail</span></button>").Title("").Width(100);
+
+                        //columns.Command(commands =>
+                        //{
+                        //    //commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                        //    //commands.Custom("Attachment").Text(" ").HtmlAttributes(new { @class = "btn btn-warning", @style = "color:white;", @title = "Tautan" }).IconClass("glyphicon glyphicon-file").Click("goToAttachmentPage");
+                        //    commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                        //}).Title("Aksi").Width(250);
+                    })
+                 .Pageable()
+                 .Sortable()
+                 .Scrollable()
+                 .Resizable(resize => resize.Columns(true))
+                 .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function goToDetailPage(e) {
+                            window.location.href = '@Url.Action("DetailPoint", "MasterMenuPoint")' + '/' + e;
+                    }
+
+                    function goToAttachmentPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("EditAttachment", "MasterMenuPoint")' + '/' + dataItem.id;
+                    }
+
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "MasterMenuPoint")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found'; 
+
+                            //just checking to see if we have a name for the image 
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }    
+                </script>
+                
+            </div>
+        </div>
+    </div>
+</div>
+

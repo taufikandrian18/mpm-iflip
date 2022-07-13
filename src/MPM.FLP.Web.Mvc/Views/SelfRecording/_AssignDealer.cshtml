@@ -1,0 +1,589 @@
+﻿@model MPM.FLP.FLPDb.SelfRecordings
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div id="tabstrip">
+    <ul id="tabItem">
+        <li class="k-state-active">
+            <p><b>Assign dealer pada @Model.Title</b></p>
+        </li>
+        <li>
+            <p id="assignedLabel"><b>Dealer Assigned</b></p>
+        </li>
+    </ul>
+    <div class="row">
+        <div class="header">
+            <input type="button" id="btnAssignAllDealer" value="Assign all dealer to @Model.Title" class="btn btn-lg btn-success" />
+            <button class="btn btn-info pull-right" onclick="backToIndex()">Kembali</button>
+        </div>
+        <hr />
+        <div class="body">
+            @using (Html.BeginForm("InsertDealer", "SelfRecording", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+            {
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label class="control-label">Channel</label><br />
+                    @(Html.Kendo().DropDownList()
+                                  .Name("channel")
+                                  .OptionLabel("Pilih Semua Channel...")
+                                  .BindTo(new List<string>() {
+                                      "",
+                                      "H1",
+                                      "H2"
+                                  })
+                                 .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                    <br /><br />
+                    <label class="control-label">Kota</label><br />
+                    @(Html.Kendo().DropDownList()
+                                    .Name("kota")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("Semua Kota")
+                                    .DataTextField("kota")
+                                    .DataValueField("kota")
+                                    .DataSource(source =>
+                                            source.Custom()
+                                               .ServerFiltering(true)
+                                               .Type("aspnetmvc-ajax")
+                                               .Transport(transport => transport
+                                                    .Read(read =>
+                                                    {
+                                                        read.Action("Cascading_Get_Kota", "SelfRecording");
+                                                    })
+                                               )
+                                               .Schema(schema => schema
+                                                    .Data("data")
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id("kota");
+                                                        model.Field("kota", typeof(string));
+                                                    })
+                                                    .Parse(@<text>
+                                                                function(response) {
+                                                                return response.result;
+                                                                }
+                                                    </text>)
+                            )
+                          )
+                                )
+
+                    <br /><br />
+                    <button type="button" id="btn_getDealer" value="Search Dealer" class="btn btn-primary pull-right">Search Dealer</button><br /><br />
+                    <hr />
+                    <h4 class="pull-left">List Dealer</h4>
+                    <div class="form-group has-feedback ">
+                        <input type="text" class="k-textbox pull-right" id='searchBox' placeholder='Search by nama dealer' />
+                        @*<label class="control-label pull-right">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </label><br />*@
+                    </div>
+                    <br /><br /><br />
+                    @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.DealerVM>()
+                             .Name("grid")
+                             .Columns(columns =>
+                             {
+                                 columns.Select().Width(50);
+                                 columns.Bound(typeof(string), "").ClientTemplate("#= renderNumber(data) #").Title("No");
+                                 columns.Bound(typeof(string), "kodeDealerMPM").Title("Kode Dealer MPM");
+                                 columns.Bound(typeof(string), "nama").Title("Nama Dealer");
+                                 columns.Template("<button class='btn btn-primary waves-effect' onclick='assignID(\"#=data.id#\",\"#=data.nama#\",\"#=data.kodeDealerMPM#\")'><span>Assign</span></button>").Title("Action");
+
+                             })
+                             .Events(ev => ev.DataBound("onDataBound"))
+                             .Pageable()
+                             .Sortable()
+                             )
+                    @*@(Html.Kendo().ListBox()
+                                        .Name("optional")
+                                        .ConnectWith("selected")
+                                        .DataTextField("nama")
+                                        .DataValueField("id")
+                                        .TemplateId("dealer-item-template")
+                                        .HtmlAttributes(new { style = "width:400px; height:400px" })
+                                        .Selectable(ListBoxSelectable.Multiple)
+                                         .Draggable(true)
+                                         .DropSources("selected")
+                                         .Toolbar(toolbar =>
+                                         {
+                                             toolbar.Tools(tools => tools
+                                                 .MoveUp()
+                                                 .MoveDown()
+                                                 .TransferTo()
+                                                 .TransferFrom()
+                                                 .TransferAllTo()
+                                                 .TransferAllFrom()
+                                                 .Remove());
+                                         })
+                                         .BindTo(new List<MPM.FLP.Web.Models.FLPMPM.DealerVM>())
+                                    )
+                        @(Html.Kendo().ListBox()
+                                        .Name("selected")
+                                        .DataTextField("nama")
+                                        .DataValueField("id")
+                                        .TemplateId("dealer-item-template")
+                                        .HtmlAttributes(new { style = "width:400px; height:400px" })
+                                        .Draggable(true)
+                                        .Selectable(ListBoxSelectable.Multiple)
+                                        .DropSources("optional")
+                                        .BindTo(new List<MPM.FLP.Web.Models.FLPMPM.DealerVM>())
+                                    )*@
+                    <script id="dealer-item-template" type="text/x-kendo-template">
+                        <span class="k-state-default">#: data.nama # - #: data.kodedealermpm #</span>
+                    </script>
+
+                </div>
+
+                @*<div class="form-group">
+                        <input type="submit" id="btnSubmit" value="Ubah" class="btn btn-primary" />
+                        <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                    </div>*@
+            }
+            @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+        </div>
+        <div class="footer">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="header">
+            <input type="button" id="btnRemoveAllDealer" value="Remove all dealer from @Model.Title" class="btn btn-lg btn-warning" />
+            <button class="btn btn-info pull-right" onclick="backToIndex()">Kembali</button>
+        </div>
+        <hr />
+        <div class="body">
+
+            <h4 class="pull-left">List Assigned Dealer</h4>
+            <div class="form-group has-feedback">
+                <input type="text" class="k-textbox  pull-right" id='searchBox2' placeholder='Search by nama dealer' />
+                @*<label class="control-label">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </label><br />*@
+            </div>
+            <br /><br /> <br />
+            @(Html.Kendo().Grid < MPM.FLP.Web.Models.FLPMPM.DealerVM > ()
+                             .Name("grid2")
+                             .Columns(columns =>
+                             {
+                                 columns.Select().Width(50);
+                                 columns.Bound(typeof(string), "").ClientTemplate("#= renderNumber(data) #").Title("No");
+                                 columns.Bound(typeof(string), "kodedealermpm").Title("Kode Dealer MPM");
+                                 columns.Bound(typeof(string), "nama").Title("Nama Dealer");
+                                 columns.Template("<button class='btn btn-danger waves-effect' onclick='removeID(\"#=data.id#\",\"#=data.nama#\",\"#=data.kodedealermpm#\")'><span>Remove</span></button>").Title("Action");
+
+                             })
+                              .Events(ev => ev.DataBound("onDataBound"))
+                             .Pageable()
+                             .Sortable()
+                             )
+        </div>
+    </div>
+</div>
+<script>
+
+    function assignID(id,nama,kode) {
+
+        var listDealer = [];
+        listDealer.push({ id: id, nama: nama, kodedealermpm: kode});
+
+        console.log(listDealer);
+
+                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedDealer: listDealer
+                                            };
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("InsertDealer", "SelfRecording")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            alert(response.result.message);
+                                            //insertRecipient(response.result.message);
+                                            //console.log(response);
+                                        }
+                                    });
+
+
+                        }
+
+    function removeID(id, nama, kode) {
+
+                            var listDealer = [];
+                            listDealer.push({ id: id, nama: nama, kodedealermpm: kode });
+
+
+
+                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedDealer: listDealer
+                                            };
+
+        console.log(parameter);
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("RemoveDealer", "SelfRecording")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            alert(response.result.message);
+                                            //insertRecipient(response.result.message);
+                                            //console.log(response);
+                                        }
+                                    });
+
+
+    }
+
+    var counter = 1;
+
+    function onDataBound(e) {
+        counter = 1;
+    }
+
+    function renderNumber(data) {
+        return counter++;
+
+    }
+
+                                    function filterKota() {
+                                        return {
+                                            kota: $("#kota").val()
+                                        };
+                                    }
+
+                                    $(document).ready(function () {
+
+                                        //var optional = $('#optional').data('kendoListBox');
+                                        //var selected = $('#selected').data('kendoListBox');
+                                        var grid = $('#grid').data('kendoGrid');
+                                        var grid2 = $('#grid2').data('kendoGrid');
+
+                                        grid.table.on("click", ".k-checkbox", selectRow);
+                                        grid2.table.on("click", ".k-checkbox", selectRowRemove);
+
+                                        $("#btnAssignAllDealer").bind("click", function () {
+                                            var listDealer = [];
+                                            for (var i in assignDealercheckedIds) {
+                                                if (assignDealercheckedIds[i]) {
+
+                                                    listDealer.push({ id: "", nama: "", kodedealermpm: i });
+                                                }
+                                            }
+                                            //alert(listDealer);
+
+                                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedDealer: listDealer
+                                            };
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("InsertDealer", "SelfRecording")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            alert(response.result.message);
+                                            //insertRecipient(response.result.message);
+                                            //console.log(response);
+                                        }
+                                    });
+                                        });
+
+                                        $("#btnRemoveAllDealer").bind("click", function () {
+                                            var listDealer = [];
+                                            for (var i in removeDealercheckedIds) {
+                                                if (removeDealercheckedIds[i]) {
+
+                                                    listDealer.push({ id: "", nama: "", kodedealermpm: i });
+                                                }
+                                            }
+                                            //alert(listDealer[0].kodedealermpm);
+
+                                            var parameter = {
+                                                id : "@Model.Id",
+                                selectedDealer: listDealer
+                                            };
+
+        console.log(parameter);
+                            $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("RemoveDealer", "SelfRecording")',
+                                        data: parameter,
+                                        success: function (response) {
+                                            //code omitted for brevity
+                                            alert(response.result.message);
+                                            //insertRecipient(response.result.message);
+                                            //console.log(response);
+                                        }
+                                    });
+                                        });
+
+                                        var assignDealercheckedIds = {};
+                                        var removeDealercheckedIds = {};
+
+                                        function selectRow() {
+                                            var checked = this.checked,
+                                                row = $(this).closest("tr"),
+                                                grid = $("#grid").data("kendoGrid"),
+                                                dataItem = grid.dataItem(row);
+                                            //console.log(dataItem);
+                                            assignDealercheckedIds[dataItem.kodeDealerMPM] = checked;
+                                            //console.log(assignDealercheckedIds);
+                                            if (checked) {
+                                                //-select the row
+                                                //row.addClass("k-state-selected");
+                                            } else {
+                                                //-remove selection
+                                                //row.removeClass("k-state-selected");
+                                            }
+                                        }
+
+                                        function selectRowRemove() {
+                                            var checked = this.checked,
+                                                row = $(this).closest("tr"),
+                                                grid = $("#grid2").data("kendoGrid"),
+                                                dataItem = grid.dataItem(row);
+                                            console.log(dataItem);
+                                            removeDealercheckedIds[dataItem.kodedealermpm] = checked;
+                                            if (checked) {
+                                                //-select the row
+                                                //row.addClass("k-state-selected");
+                                            } else {
+                                                //-remove selection
+                                                //row.removeClass("k-state-selected");
+                                            }
+                                        }
+
+                                        $('#grid .k-grid-header .k-checkbox').change(function (ev) {
+                                            var checked = ev.target.checked;
+                                            if (checked) {
+
+
+                                                $('#grid .k-checkbox').each(function (idx, item) {
+                                                    if (checked) {
+                                                        //$(item).click();
+                                                        if (!($(item).closest('tr').is('.k-state-selected'))) {
+                                                            $(item).click();
+                                                        }
+                                                    } else {
+                                                        //$(item).click();
+                                                        if ($(item).closest('tr').is('.k-state-selected')) {
+
+                                                            $(item).click();
+
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                assignDealercheckedIds = {};
+                                            }
+                                        });
+
+                                        $('#grid2 .k-grid-header .k-checkbox').change(function (ev) {
+                                            var checked = ev.target.checked;
+                                            if (checked) {
+                                                $('#grid2 .k-checkbox').each(function (idx, item) {
+                                                    if (checked) {
+                                                        if (!($(item).closest('tr').is('.k-state-selected'))) {
+                                                            $(item).click();
+                                                        }
+                                                    } else {
+                                                        if ($(item).closest('tr').is('.k-state-selected')) {
+                                                            $(item).click();
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                removeDealercheckedIds = {};
+                                            }
+                                        });
+
+
+                                         $("#searchBox").on("input",function(e) {
+                                            //var listBox = $("#optional").getKendoListBox();
+                                            var searchString = $(this).val();
+                                             grid.dataSource.filter({ field: "nama", operator: "contains", value: searchString });
+                                            //listBox.dataSource.filter({ field: "kodedealermpm", operator: "contains", value: searchString });
+                                         });
+
+                                        $("#searchBox2").on("input", function (e) {
+
+                                            var searchString = $(this).val();
+                                            console.log();
+                                            grid2.dataSource.filter({ field: "nama", operator: "contains", value: searchString });
+                                        });
+
+                                        var id = {
+                                            id: "@Model.Id"
+                                        };
+
+                                        $.ajax({
+                                            url: "@Url.Action("GetAssignedDealer","SelfRecording")",
+                                            data: id,
+                                            type: 'GET',
+                                            success: function (response) {
+                                                var dealerList = response.result;
+                                                //dealerList.forEach(insertAssignedDealer);
+                                                var dataSource = new kendo.data.DataSource({ data: dealerList, pageSize: 10 });
+                                                console.log(dataSource);
+                                                grid2.setDataSource(dataSource);
+                                                grid2.dataSource.read();
+                                                document.getElementById('assignedLabel').innerHTML = '<b>Dealer Assigned (' + dealerList.length + ')</b>';
+
+                                            },
+                                            error: function (response) {
+                                            }
+                                        });
+
+                                        var Dealer = kendo.data.Model.define({
+                                            id: "id",
+                                            fields: {
+                                                "nama": {
+                                                    type: "string"
+                                                },
+                                                "kodedealermpm": {
+                                                    type: "string"
+                                                }
+                                            }
+                                        });
+
+                                        $("#btn_getDealer").click(function () {
+                                            abp.ui.setBusy();
+                                            var parameter = {
+                                                kota: $("#kota").val(),
+                                                //dealer: $("#dealer").val(),
+                                                channel: $("#channel").val(),
+                                                     id: "@Model.Id"
+                                            };
+
+                                            //if (parameter.kota == null || parameter.kota == "") {
+                                            //    abp.ui.clearBusy();
+                                            //    alert("Kota belum dipilih");
+                                            //}
+                                            //else {
+                                                $.ajax({
+                                                    url: "@Url.Action("Get_Dealer","SelfRecording")",
+                                                    data: parameter,
+                                                    type: 'GET',
+                                                    success: function (response) {
+                                                        //removeUser();
+                                                        var dealerList = response.result;
+                                                        //dealerList.forEach(insertDealer);
+                                                        var dataSource = new kendo.data.DataSource({ data: dealerList, pageSize: 10 });
+
+
+
+                                                        grid.setDataSource(dataSource);
+                                                        grid.dataSource.read();
+                                                        abp.ui.clearBusy();
+                                                    },
+                                                    error: function (response) {
+                                                    }
+                                                });
+                                            //}
+
+                                        })
+
+                                        function removeUser() {
+                                            var items = optional.items();
+                                            for (var i = 0; i < items.length; i++) {
+                                                optional.remove(items[i]);
+                                            }
+
+                                        }
+
+                                        function insertDealer(item, index) {
+                                            optional.add(new Dealer({
+                                                id: item.id,
+                                                nama: item.nama,
+                                                kodedealermpm: item.kodeDealerMPM
+                                            }));
+                                        }
+                                        function insertAssignedDealer(item, index) {
+                                            selected.add(new Dealer({
+                                                id: item.id,
+                                                nama: item.nama,
+                                                kodedealermpm: item.kodedealermpm
+                                            }));
+                                        }
+                                    });
+
+</script>
+<script>
+
+    $(document).ready(function () {
+        $("#tabstrip").kendoTabStrip({
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            }
+        });
+    });
+
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "SelfRecording", Model)';
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();
+
+            var formdata = new FormData($('#formCreate').get(0));
+
+            //var selected = $('#selected').data('kendoListBox').dataItems();
+
+            @*var listDealer = [];
+
+                $.each(selected, function (key, value) {
+                    listDealer.push({
+                        id: value.id, nama: value.nama, kodedealermpm: value.kodedealermpm
+                    });
+                });
+
+                var parameter = {
+                    id : "@Model.Id",
+                    selectedDealer: listDealer
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InsertDealer", "SelfRecording")',
+                    data: parameter,
+                    success: function (response) {
+                        //code omitted for brevity
+                        alert(response.result.message);
+                        //insertRecipient(response.result.message);
+                        //console.log(response);
+                    }
+                });*@
+
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "SelfRecording")';
+        //window.history.back();
+    };
+
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

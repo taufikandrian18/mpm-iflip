@@ -1,0 +1,155 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.RolePlays
+@{
+    ViewData["Title"] = "Roleplay";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Roleplay @Model.Title Detail
+                </h2>
+            </div>
+            <div class="body">
+                <div class="form-group">
+                    <button id="backToHwQuiz" class="btn btn-primary" onclick="BackToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+                    @*<button id="importExcel" class="btn btn-warning" onclick="ImportExcel('@Model.Id')">Import Excel</button>*@
+                    <button id="importBtn" class="btn btn-warning" onclick="ImportExcel()">Import Excel</button>
+                    <button id="templateBtn" class="btn btn-info pull-right" onclick="TemplateExcel()">Download Template</button>
+                    <button id="downloadBtn" class="btn btn-success" onclick="DownloadExcel()">Download Excel</button>
+                    @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                    @*<button asp-action="Index" class="btn btn-default">Kembali</button>*@
+                </div>
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.RolePlayDetails>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Detail Baru").HtmlAttributes(new { Href = Url.Action("CreateDetail", "Roleplay", Model) });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Detail_Read", "Roleplay", Model))
+                                                .Destroy(destroy => destroy.Action("Grid_Detail_Destroy", "Roleplay"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                  .Data("data")
+                  .Total("total")
+                  )
+                )
+             .Columns(columns =>
+             {
+                 columns.Bound(typeof(string), "title").Title("Judul").Width(200).Filterable(true);
+                 columns.Bound(typeof(int), "order").Title("Order").Width(100).Filterable(false);
+                 columns.Bound(typeof(string), "isMandatorySilver").ClientTemplate(
+           "#=ShowValue(data.isMandatorySilver,data.isMandatoryGold,data.isMandatoryPlatinum)#")
+         .Title("Mandatory").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100);
+                 columns.Bound(typeof(string), "creatorUsername").Title("Pembuat").Width(150).Filterable(false);
+                 columns.Bound(typeof(DateTime), "creationTime").Title("Tanggal Buat").ClientTemplate("#= data.creationTime ? kendo.toString(kendo.parseDate(data.creationTime), 'dd-MM-yyyy') : '' #").Width(150).Filterable(false);
+                 columns.Bound(typeof(string), "lastModifierUsername").Title("Pembaharu").Width(150).Filterable(false);
+                 columns.Bound(typeof(DateTime), "lastModificationTime").Title("Tanggal Pembaharuan").ClientTemplate("#= data.lastModificationTime ? kendo.toString(kendo.parseDate(data.lastModificationTime), 'dd-MM-yyyy') : '' #").Width(180).Filterable(false);
+                 columns.Command(commands =>
+                                                            {
+                     commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("GoToEditPage");
+                     commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                 }).Title("Aksi").Width(180);
+             })
+          .Pageable()
+          .Sortable()
+          .Scrollable()
+          .Resizable(resize => resize.Columns(true))
+          .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(silver, gold, platinum) {
+                        var value = "";
+                        if (silver) {
+                            value = "S";
+                        }
+                        if (gold) {
+                            if (value != "") {
+                                value += " G"
+                            } else {
+                                value = "G"
+                            }
+                        }
+                        if (platinum) {
+                            if (value != "") {
+                                value += " P"
+                            } else {
+                                value = "P";
+                            }
+                        }
+                        return value;
+                        //if (value == true) {
+                        //    return "<i class='glyphicon glyphicon-ok'/>";
+                        //} else {
+                        //    return "<i class='glyphicon glyphicon-remove'/>";
+                        //}
+                    }
+                    @*function goToClaimedPage(e) {
+                            window.location.href = '@Url.Action("ClaimedPeople", "Roleplay")' + '/' + e;
+                    }*@
+
+                    function GoToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("EditDetail", "Roleplay")' + '/' + dataItem.id;
+                    }
+                    function DownloadExcel(e) {
+
+                        window.location.href = '@Url.Action("DownloadDetail", "Roleplay",Model)';
+                    }
+
+                    function ImportExcel(e) {
+                        window.location.href = '@Url.Action("ImportExcel", "Roleplay")' + '/' + '@Model.Id';
+                    }
+
+                    function TemplateExcel(e) {
+                        window.location.href = '@Url.Action("DownloadTemplate", "Roleplay", Model)';
+                    }
+                    
+                    function BackToIndex() {
+                       window.location.href = '@Url.Action("Index", "Roleplay")';
+                        //window.history.back();
+                    };
+                    //function GetMyImage(image)
+                    //{
+                    //   var returnString = 'No Image Found';
+
+                    //        //just checking to see if we have a name for the image
+                    //    if (image != null && image.length > 0) {
+                    //        returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    //        return returnString;
+                    //    } else
+                    //        return "";
+                    //}
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

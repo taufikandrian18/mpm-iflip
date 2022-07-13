@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <VersionPrefix>1.0.0.0</VersionPrefix>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>MPM.FLP.Application</AssemblyName>
+    <PackageId>MPM.FLP.Application</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>MPM.FLP</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MPM.FLP.Core\MPM.FLP.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore" Version="4.8.1" />
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="4.8.1" />
+    <PackageReference Include="Abp.AutoMapper" Version="4.8.1" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="4.8.1" />
+    <PackageReference Include="Abp.EntityFrameworkCore.EFPlus" Version="4.8.1" />
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.5.4" />
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.7" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.1.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Otp.NET" Version="1.2.1" />
+    <PackageReference Include="CorePush" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PushNotification\" />
+  </ItemGroup>
+</Project>

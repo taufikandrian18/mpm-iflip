@@ -1,0 +1,142 @@
+﻿@model MPM.FLP.Services.Dto.AddPointConfigurationDto
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Menu Default Baru</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("CreateDefault", "MasterMenuPoint", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="ContentType" class="control-label">Content Type</label> <br />
+                                @(Html.Kendo().DropDownListFor(x => x.ContentType)
+                                    .DataTextField("show") // Specify which property of the Product to be used by the DropDownList as a text.
+                                    .DataValueField("value") // Specify which property of the Product to be used by the DropDownList as a value.
+                                    .DataSource(source =>
+                                    {
+                                        source.Ajax()
+                                        .Read(read =>
+                                        {
+                                            read.Action("GetContentType", "MasterMenuPoint"); // Set the Action and Controller names.
+                                        });
+
+                                    })
+                                    .SelectedIndex(0) // Select the first item.
+                                )
+                                <span asp-validation-for="ContentType" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ActivityType" class="control-label">Activity Type</label> <br />
+                                @(Html.Kendo().DropDownListFor(x => x.ActivityType)
+                                    .DataTextField("show") // Specify which property of the Product to be used by the DropDownList as a text.
+                                    .DataValueField("value") // Specify which property of the Product to be used by the DropDownList as a value.
+                                    .DataSource(source =>
+                                    {
+                                        source.Ajax()
+                                        .Read(read =>
+                                        {
+                                            read.Action("GetActivityType", "MasterMenuPoint"); // Set the Action and Controller names.
+                                        });
+
+                                    })
+                                    .SelectedIndex(0) // Select the first item.
+                                )
+                                <span asp-validation-for="ActivityType" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Point" class="control-label">Point Default</label><br />
+                                <input type="number" min="0" asp-for="Point" id="txtPoint" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="DefaultThreshold" class="control-label">Default Threshold</label><br />
+                                <input type="number" min="0" asp-for="DefaultThreshold" id="txtPoint" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Tambah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+                @*<div class="form-group">
+                        <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                        <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                    </div>*@
+            </div>
+            <div class="footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();
+
+           
+            var formdata = new FormData($('#formCreate').get(0));
+            var content = $("#ContentType").data("kendoDropDownList").value();
+            var activity = $("#ActivityType").data("kendoDropDownList").value();
+            if (content == "") {
+                alert("Content Type masih kosong");
+            } else if (activity == "") {
+                alert("Activity Type masih kosong");
+            } else {
+                abp.ui.setBusy();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateDefault", "MasterMenuPoint")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        if (response.result.success) {
+                            alert("Data berhasil dimasukkan");
+                            window.location.href = '@Url.Action("Index", "MasterMenuPoint")';
+                        }
+                        else {
+                            alert("Content type sudah terdapat pada database");
+                        }
+                    }
+                });
+            }
+                   
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "MasterMenuPoint")';
+        //window.history.back();
+    };
+
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

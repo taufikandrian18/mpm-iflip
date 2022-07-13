@@ -1,0 +1,139 @@
+﻿@model MPM.FLP.FLPDb.VerifikasiJabatans
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Verifikasi Jabatan Baru</h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("Create", "VerifikasiJabatans", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Title" class="control-label">Judul</label><br />
+                                <input asp-for="Title" id="txtTitle" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="IDGroupJabatan" class="control-label">Id Group Jabatan</label><br />
+                                @(Html.Kendo().DropDownListFor(x=>x.IDGroupJabatan)
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                    .OptionLabel("Pilih Id Group Jabatan...")
+                                    .DataTextField("idgroupjabatan")
+                                    .DataValueField("idgroupjabatan")
+                                    .DataSource(source =>
+                                            source.Custom()
+                                               .ServerFiltering(true)
+                                               .Type("aspnetmvc-ajax")
+                                               .Transport(transport => transport
+                                                    .Read(read =>
+                                                    {
+                                                        read.Action("Get_IdGroupJabatan", "VerifikasiJabatans");
+                                                    })
+                                               )
+                                               .Schema(schema => schema
+                                                    .Data("data")
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id("idgroupjabatan");
+                                                        model.Field("idgroupjabatan", typeof(string));
+                                                    })
+                                                    .Parse(@<text>
+                                                                function(response) {
+                                                                return response.result;
+                                                                }
+                                                    </text>)
+                                  )
+                                  )
+                                )
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="PassingScore" class="control-label">Passing Score</label><br />
+                                <input type="number" min="0" asp-for="PassingScore" class="k-textbox" style="width:100%" required />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Tambah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+                    
+                </div>
+                @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "HomeworkQuiz", Model)';
+        });
+
+    });
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+
+            var dropdown = $("#IDGroupJabatan").data("kendoDropDownList").value();
+
+            if (dropdown == "") {
+                alert("Id group jabatan belum dipilih");
+            } else {
+                abp.ui.setBusy();
+                var formdata = new FormData($('#formCreate').get(0)); 
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Create", "VerifikasiJabatans")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false, 
+                    contentType: false, 
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Index", "VerifikasiJabatans")';
+                    }   
+                });
+            }
+            
+                
+        }); 
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "VerifikasiJabatans")';
+        //window.history.back();
+    };
+
+    
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

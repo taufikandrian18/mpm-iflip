@@ -1,0 +1,114 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.Articles
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Artikel Attachment</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["success"] != "" && TempData["success"] != null)
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["success"]
+                    </div>
+                }
+                <form asp-action="EditAttachment">
+                    <div class="form-group">
+                        <label class="control-label">Tambah gambar baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("files")
+                            .Multiple(true)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                </form>
+                @if (!string.IsNullOrEmpty(ViewBag.result))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @ViewBag.result
+                    </div>
+                }
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.ArticleAttachments>()
+                            .Name("grid")
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                             .Read(read => read.Action("GridAttachment_Read", "Artikel", new { modelId = Model.Id }))
+                                             .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "Artikel", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                 .Model(m =>
+                                 {
+                                     m.Id("id");
+                                 })
+                                 .Parse(@<text>
+                                            function(response) {
+                                            return response.result;
+                                            }
+                                </text>)
+                      .Data("data")
+                      .Total("total")
+                      )
+                  )
+                  .Columns(columns =>
+                  {
+                  columns.Bound(typeof(string), "title").Title("Title");
+                  columns.Bound(typeof(string), "storageUrl").ClientTemplate(
+                  "#=GetMyImage(data.storageUrl)#").Width(240)
+                  .Title("Image");
+                  columns.Command(commands =>
+                  {
+                      commands.Destroy().Text("Hapus");
+                      }).Width(250);
+                  })
+                )
+            </div>
+        </div>
+        
+        <script type="text/javascript">
+            function GetId(){
+                return {
+                    id : @Model.Id
+                }
+            }
+        </script>
+
+        <script>
+            
+            function GetMyImage(image)
+            {
+                var returnString = 'No Image Found';
+
+                // just checking to see if we have a name for the image
+                if (image != null && image.length > 0) {
+                    returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    return returnString;
+                } else
+                    return "";
+            }        
+
+        </script>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

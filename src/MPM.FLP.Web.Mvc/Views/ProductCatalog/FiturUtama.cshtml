@@ -1,0 +1,138 @@
+﻿@model MPM.FLP.FLPDb.ProductCatalogs
+
+@{
+    ViewData["Title"] = "Fitur Utama";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        
+        <div class="card">
+            <div class="header">
+                <h2>Fitur Utama</h2> 
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+                @if ((string)TempData["success"] != "" && TempData["success"] != null)
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["success"]
+                    </div>
+                }
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.ProductFeatures>()
+                              .Name("grid")
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read_FiturUtama", "ProductCatalog", Model))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy_FiturUtama", "ProductCatalog"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+             .Data("data")
+             .Total("total")
+             )
+           )
+            .Columns(columns =>
+            {
+                columns.Bound(typeof(string), "title").Title("Judul");
+                columns.Bound(typeof(string), "description").Title("Deskripsi");
+                columns.Bound(typeof(string), "imageUrl").ClientTemplate(
+         "#=GetMyImage(data.imageUrl)#").Width(240)
+         .Title("Gambar");
+                columns.Command(commands =>
+                {
+                    commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "Ubah" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPartial");
+                    commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                }).Width(200).Title("Aksi");
+            })
+             .Pageable()
+             .Sortable()
+                )
+                <div class="form-group">
+                    <button id="btnOpenPartial" class="btn btn-default" data-assigned-id="@Model.Id" data-toggle="modal" data-target="#myModal"><i class="glyphicon glyphicon-plus"></i></button>
+                    @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                    <button id="backToIndexBtn" class="btn btn-primary">Kembali</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+     $(function () {
+            $('#btnOpenPartial').click(function () {
+                var id = $(this).data('assigned-id');
+                var route = '@Url.Action("PartialFiturUtama", "ProductCatalog")?id=' + id;
+                $('#partial').load(route);
+            });
+
+     });
+
+    $(function () {
+            $('#backToIndexBtn').click(function () {
+                window.location.href = '@Url.Action("Index", "ProductCatalog")';
+            });
+
+     });
+
+    function goToEditPartial(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var route = '@Url.Action("EditPartialFiturUtama", "ProductCatalog")?id=' + dataItem.id;
+        $('#partial').load(route);
+        $('#myModal').modal({show:true});
+    }
+
+    function GetMyImage(image)
+    {
+        var returnString = 'No Image Found';
+
+        //just checking to see if we have a name for the image
+        if (image != null && image.length > 0) {
+            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+            return returnString;
+        } else
+            return "";
+    }
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                @*<h4 class="modal-title">Modal Header</h4>*@
+            </div>
+            <div class="modal-body">
+                <div id="partial"></div>
+            </div>
+            @*<div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

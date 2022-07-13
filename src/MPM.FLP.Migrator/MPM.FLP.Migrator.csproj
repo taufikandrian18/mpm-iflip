@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>MPM.FLP.Migrator</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>MPM.FLP.Migrator</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="appsettings.json;log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Abp.AspNetCore" Version="4.8.1" />
+    <PackageReference Include="Abp.AspNetCore.SignalR" Version="4.8.1" />
+    <PackageReference Include="Abp.AutoMapper" Version="4.8.1" />
+    <PackageReference Include="Abp.Castle.Log4Net" Version="4.8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MPM.FLP.Core\MPM.FLP.Core.csproj" />
+    <ProjectReference Include="..\MPM.FLP.EntityFrameworkCore\MPM.FLP.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+</Project>

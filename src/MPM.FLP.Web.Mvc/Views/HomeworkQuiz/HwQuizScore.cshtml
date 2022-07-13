@@ -1,0 +1,92 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.HomeworkQuizzes
+@{
+    ViewData["Title"] = "HomeworkQuiz";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Score Homework Quiz @Model.Title
+                </h2>
+            </div>
+            
+            <div class="body">
+                <div class="form-group">
+                    <button id="backToIndex" class="btn btn-primary" onclick="backToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+                </div>
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.HomeworkQuizHistories>()
+                              .Name("grid")
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read_HwQuizScore", "HomeworkQuiz", Model))
+                                                //.Destroy(destroy => destroy.Action("GridQuestion_Destroy", "HomeworkQuiz"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+    .Data("data")
+    .Total("total")
+    )
+  )
+.Columns(columns =>
+{
+   columns.Bound(typeof(int?), "idmpm").Title("Id MPM");
+   columns.Bound(typeof(string), "name").Title("Nama");
+   columns.Bound(typeof(string), "jabatan").Title("Jabatan");
+   columns.Bound(typeof(string), "kota").Title("Kota");
+   columns.Bound(typeof(string), "dealer").Title("Dealer");
+   columns.Bound(typeof(int?), "correctAnswer").Title("Jawaban Benar");
+   columns.Bound(typeof(int?), "wrongAnswer").Title("Jawaban Salah");
+   columns.Bound(typeof(decimal?), "score").Title("Skor");
+   //columns.Command(commands =>
+   //                                           {
+   //    commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditQuestionPage");
+   //    commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+   //}).Width(250);
+})
+.Pageable()
+.Sortable()
+                )
+
+                <script>
+
+                    function goToEditQuestionPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("EditQuestion", "HomeworkQuiz")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }
+                    function backToIndex() {
+                       window.location.href = '@Url.Action("Index", "HomeworkQuiz")';
+                        //window.history.back();
+                    };
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

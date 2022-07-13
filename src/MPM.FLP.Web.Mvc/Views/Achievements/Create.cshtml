@@ -1,0 +1,53 @@
+﻿@model MPM.FLP.FLPDb.Achievements
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Achievement Baru</h2>
+            </div>
+            <div class="body">
+                <form id="form" asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        @*<textarea  class="form-control" />*@
+                        <textarea asp-for="Description" cols="50" rows="5" runat="server"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Buat</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.history.back();
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

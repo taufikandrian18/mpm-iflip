@@ -1,0 +1,95 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.Web.Models.FLPMPM.PointHistoriesVM
+@{
+    ViewData["Title"] = "Point Histories";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Point Histories
+                </h2>
+            </div>
+            <div class="body">
+                @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.PointHistoriesVM>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Points Histories Baru").HtmlAttributes(new { Href = Url.Action("Create", "MasterPointsHistories") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read", "MasterPointsHistories"))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy", "MasterPointsHistories"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                  .Data("data")
+                  .Total("total")
+                  )
+                )
+                 .Columns(columns =>
+                 {
+                     columns.Bound(typeof(string), "nama").Title("Nama").Filterable(true);
+                     columns.Bound(typeof(string), "channel").Title("Channel").Filterable(false);
+                     columns.Bound(typeof(string), "dealer").Title("Dealer").Filterable(false);
+                     columns.Bound(typeof(string), "masterPoint").Title("Master Point").Filterable(false);
+                     columns.Bound(typeof(int), "point").Title("Point").Filterable(false);
+                     columns.Bound(typeof(DateTime), "periode").Title("Periode").ClientTemplate("#= data.periode ? kendo.toString(kendo.parseDate(data.periode), 'dd-MM-yyyy') : '' #").Width(120).Filterable(false);
+                     columns.Command(commands =>
+                     {
+                         commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                         //commands.Custom("Attachment").Text(" ").HtmlAttributes(new { @class = "btn btn-warning", @style = "color:white;", @title = "Tautan" }).IconClass("glyphicon glyphicon-file").Click("goToAttachmentPage");
+                         commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                     }).Width(250);
+                 })
+              .Pageable()
+              .Sortable()
+              .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function goToHistoryPage(e) {
+                            window.location.href = '@Url.Action("PointHistories", "MasterPointsHistories")' + '/' + e;
+                    }
+
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "MasterPointsHistories")' + '/' + dataItem.id;
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

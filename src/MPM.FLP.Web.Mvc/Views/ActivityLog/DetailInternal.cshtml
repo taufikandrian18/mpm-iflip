@@ -1,0 +1,66 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.ActivityLogs
+@{
+    ViewData["Title"] = "ActivityLogs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2 >
+                    Detail Activity Log
+                </h2>
+            </div>
+            <div class="body">
+                <div class="form-group">
+                    <button id="backToIndex" class="btn btn-primary" onclick="BackToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+                </div>
+                <div class="row table-responsive">
+                    @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.ActivityDetailInternalVM>()
+                                .Name("grid")
+                                .DataSource(dataSource => dataSource
+                                      .Ajax()
+                                      .PageSize(10)
+                                      .Read(read => read.Action("Grid_Internal_Detail", "ActivityLog", Model)
+                                   )
+                                )
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.nama).Width(200).Title("Nama").Lockable(false).Locked(true).Filterable(true);
+                            columns.Bound(c => c.readingTime).Title("Lama Pembacaan (detik)").Width(180).Filterable(false);
+                            columns.Bound(c => c.tanggalBaca).Title("Tanggal Pembacaan").Width(180).Filterable(false);
+                            columns.Bound(c => c.kodeDealer).Title("Kode Dealer").Width(180).Filterable(true);
+                            columns.Bound(c => c.namaDealer).Title("Nama Dealer").Width(180).Filterable(false);
+                            columns.Bound(c => c.kota).Title("Kota").Width(180).Filterable(false);
+                        })
+                        .Pageable()
+                        .Sortable()
+                        .Scrollable(s => s.Height("500"))
+                        .Navigatable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Filterable(filterable => filterable
+                            .Extra(false)
+                            .Operators(operators => operators
+                            .ForString(str => str.Clear()
+                                .IsEqualTo("Is equal to")
+                                .Contains("Contains")
+                            ))
+                          )
+                    )
+
+
+                    <script>
+                        function BackToIndex() {
+                            window.location.href = '@Url.Action("Index", "ActivityLog")';
+                        }
+                    </script>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

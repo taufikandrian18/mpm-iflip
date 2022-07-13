@@ -1,0 +1,134 @@
+﻿@model MPM.FLP.Services.Dto.InternalUserDto
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Internal User</h2>
+            </div>
+            <div class="body">
+                @if (!string.IsNullOrEmpty(ViewBag.message))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @ViewBag.message
+                    </div>
+                }
+                @using (Html.BeginForm("Edit", "InternalUsers", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Nama" class="control-label">Nama</label><br />
+                        <input asp-for="Nama" class="k-textbox" style="width:100%" readonly/>
+                        <input asp-for="IDMPM" hidden />
+                        <input asp-for="AbpUserId" hidden />
+                        <input asp-for="IDHonda" hidden />
+                        <span asp-validation-for="Nama" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="IsActive" class="control-label">Aktif ?</label>
+                        <div class="checkbox">
+                            <div class="switch">
+                                <label>OFF<input asp-for="IsActive" type="checkbox" value="true"><span class="lever"></span>ON</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="NoKTP" class="control-label">No. KTP</label><br />
+                        <input asp-for="NoKTP" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="NoKTP" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Alamat" class="control-label">Alamat</label><br />
+                        <textarea asp-for="Alamat" class="k-textbox" style="width:100%" readonly></textarea>
+                        <span asp-validation-for="Alamat" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Channel" class="control-label">Channel</label><br />
+                        <input asp-for="Channel" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="Channel" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Handphone" class="control-label">No. Handphone</label><br />
+                        <input asp-for="Handphone" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="Handphone" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Gender" class="control-label">Gender</label><br />
+                        <input asp-for="Gender" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Jabatan" class="control-label">Jabatan</label><br />
+                        <input asp-for="Jabatan" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="Jabatan" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="NamaAtasan" class="control-label">Nama Atasan</label><br />
+                        <input asp-for="NamaAtasan" class="k-textbox" style="width:100%" readonly/>
+                        <span asp-validation-for="NamaAtasan" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DealerName" class="control-label">Dealer Name</label><br />
+                        <input asp-for="DealerName" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="DealerName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DealerKota" class="control-label">Dealer Kota</label><br />
+                        <input asp-for="DealerKota" class="k-textbox" style="width:100%" readonly />
+                        <span asp-validation-for="DealerKota" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" id="btnSubmit" value="Perbaharui" class="btn btn-primary" />
+                        <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                    </div>
+                }
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+            abp.ui.setBusy();
+            var formdata = new FormData($('#formCreate').get(0)); 
+            $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Edit", "InternalUsers")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false, 
+                    contentType: false, 
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        window.location.href = '@Url.Action("Index", "InternalUsers")';
+                    }   
+                });  
+                
+        }); 
+
+    });
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "InternalUsers")';
+        //window.history.back();
+    };
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

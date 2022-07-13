@@ -1,0 +1,123 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.SalesTalks
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Sales Talk</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+            <form id="form" asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label><br />
+                    <input asp-for="Title" class="k-textbox" style="width:100%" required />
+                    <input asp-for="CreatorUsername" hidden />
+                    <input asp-for="CreationTime" hidden />
+                    <input asp-for="FeaturedImageUrl" hidden />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Contents" class="control-label">Description</label><br />
+                    @(Html.Kendo().EditorFor(e => e.Contents)
+                   .HtmlAttributes(new { style = "width:100%; height:440px" })
+                       .Tools(tools => tools
+                         .Clear()
+                         .Bold().Italic().Underline().Strikethrough()
+                         .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+                         .InsertUnorderedList().InsertOrderedList()
+                         .Outdent().Indent()
+                         //.Formatting()
+                         //.CleanFormatting()
+                         .FontName()
+                         .FontSize()
+                         .ForeColor().BackColor()
+                     ).Value(@<text> @Model.Contents </text>)
+                    )
+                    <span asp-validation-for="Contents" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="StartDate" class="control-label"></label><br />
+                    @(Html.Kendo().DatePickerFor(e => e.StartDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(Model.StartDate)
+                    )
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EndDate" class="control-label"></label><br />
+                    @(Html.Kendo().DatePickerFor(e => e.EndDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(Model.EndDate)
+                    )
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ReadingTime" class="control-label">Minimal Waktu Pembacaan (detik)</label><br />
+                    <input type="number" min="0" asp-for="ReadingTime" class="k-textbox" style="width:100%" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="IsPublished" class="control-label"></label>
+                    <div class="checkbox">
+                        <div class="switch">
+                            <label>OFF<input asp-for="IsPublished" type="checkbox" value="true"><span class="lever"></span>ON</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="IsPublished" class="text-danger"></span>
+                </div>
+            </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Ubah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+            function submitForm() {
+                $("#form").submit();
+            }
+            function backToIndex() {
+                window.location.href = '@Url.Action("Index", "SalesTalks")';
+            }
+            function goToEditPage(e) {
+                e.preventDefault();
+                var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                window.location.href = '@Url.Action("Edit", "SalesTalks")' + '/' + dataItem.id;
+            }
+            function GetMyImage(image)
+            {
+                var returnString = 'No Image Found';
+
+                // just checking to see if we have a name for the image
+                if (image != null && image.length > 0) {
+                    returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    return returnString;
+                } else
+                    return "";
+            }
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

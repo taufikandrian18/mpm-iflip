@@ -1,0 +1,57 @@
+﻿@model MPM.FLP.FLPDb.ProductCatalogs
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="body">
+            @using (Html.BeginForm("CreateAksesoris", "ProductCatalog", FormMethod.Post))
+            {
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Nama Aksesoris</label><br />
+                    <input asp-for="Title" class="k-textbox" style="width:100%" />
+                    <input asp-for="Id" hidden />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PanjangLebarTinggi" class="control-label">Harga Aksesoris</label><br />
+                    <input asp-for="PanjangLebarTinggi" type="number" onkeydown="javascript: return event.keyCode === 8 || event.keyCode === 46 ? true : !isNaN(Number(event.key))" class="k-textbox" style="width:100%" min="0" />
+                    <span asp-validation-for="PanjangLebarTinggi" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ProductCode" class="control-label">Kode Aksesoris</label><br />
+                    <input asp-for="ProductCode" class="k-textbox" style="width:100%" maxlength="100"/>
+                    <input asp-for="Id" hidden />
+                    <span asp-validation-for="ProductCode" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DiameterLangkah" class="control-label">Deskripsi</label><br />
+                    <textarea asp-for="DiameterLangkah" class="k-textarea" style="width:100%" rows="3" cols="10"></textarea>
+                    <span asp-validation-for="DiameterLangkah" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Image </label>
+                    <br />
+                    @(Html.Kendo().Upload()
+                        .Name("files")
+                        .Multiple(false)
+                        .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                    )
+                </div>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary">Buat</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    const numInputs = document.querySelectorAll('input[type=number]')
+
+    numInputs.forEach(function(input) {
+      input.addEventListener('change', function(e) {
+        if (e.target.value == '') {
+          e.target.value = 0
+        }
+      })
+    })
+</script>

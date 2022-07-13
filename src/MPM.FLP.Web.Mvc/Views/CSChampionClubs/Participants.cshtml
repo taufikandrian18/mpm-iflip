@@ -1,0 +1,135 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.Articles
+@{
+    ViewData["Title"] = "Artikel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    CS Champion Club Participants
+                </h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("SearchParticipants", "CSChampionClubs", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div class="form-group">
+                                <label class="control-label">Year </label><br />
+                                <input type="number" min="0" id="txtYear" class="k-textbox" value="@DateTime.Now.Year"/>
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <input type="button" id="btnSearch" value="Search" class="btn btn-primary" />
+                                @*<input type="button" id="btnReset" class="btn btn-default" value="Reset">*@
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+                <div class="row table-responsive">
+                   
+
+                    <div id="grid"></div>
+                    <script>
+                        $().ready(function () {
+                            setupKendoGridInitial();
+                        });
+ 
+                        function setupKendoGridInitial() {
+                            $("#grid").kendoGrid({
+                                dataSource: {
+                                    pageSize: 10
+                                },
+                                columns: [
+                                    { field: "idmpm", title: "ID MPM" }
+                                    , { field: "name", title: "Nama" }
+                                    , { field: "dealerName", title: "Dealer" }
+                                ],
+                                sortable: true,
+                                pageable: true
+                            });
+
+                        }
+
+                        $(document).ready(function () {
+
+                            $("#btnSearch").click(function () {
+                                
+                                var search = true;
+
+                                var parameter = { "year": $("#txtYear").val()};
+
+                                if (parameter.year == "" || parameter.year == null)
+                                    parameter.year = 0;
+
+                                abp.ui.setBusy();
+                                    $.ajax({
+                                        url: '@Url.Action("SearchParticipants", "CSChampionClubs")',
+                                        type: "GET",
+                                        data: parameter,
+                                        success: function (response) {
+
+                                            var grid = $("#grid").data("kendoGrid");
+
+                                            if (response.result.success)
+                                                grid.dataSource.data(response.result.item);
+                                            else
+                                                alert("Data tidak ditemukan");
+
+                                            abp.ui.clearBusy();
+
+                                            @*if (response.result.success) {
+                                                alert("Data berhasil dimasukkan");
+                                                window.location.href = '@Url.Action("Index", "MasterMenuPoint")';
+                                            }
+                                            else {
+                                                alert("Content type sudah terdapat pada database");
+                                            }*@
+                                        }
+                                    });
+                                
+                            })
+
+                            //$("#btnReset").click(function () {
+                            //    $("#txtYear").val("");
+                            //    $("#txtMonth").val("");
+                            //    $("#selection").data("kendoDropDownList").value("Activity");
+                            //    $("#grid").data("kendoGrid").dataSource.data([]);
+                            //})
+                        });
+
+                        function GetMyImage(image)
+                        {
+                            var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                            if(image != null && image.length > 0)
+                            {
+                                returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                                return returnString;
+                            } else
+                            return "";
+                        }
+                        function ShowValue(value) {
+                            if (value == true) {
+                                return "<i class='glyphicon glyphicon-ok'/>";
+                            } else {
+                                return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    </script>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

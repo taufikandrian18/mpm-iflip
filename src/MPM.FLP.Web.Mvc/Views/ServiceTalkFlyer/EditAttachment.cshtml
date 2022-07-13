@@ -1,0 +1,172 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.ServiceTalkFlyers
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Services Talk Flyer Attachment</h2>
+            </div>
+            <div class="body">
+                <form asp-action="EditAttachment">
+                    <div class="form-group">
+                        <label class="control-label">Tambah gambar baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("files")
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                </form>
+                @if (!string.IsNullOrEmpty(ViewBag.result))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @ViewBag.result
+                    </div>
+                }
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.ServiceTalkFlyerAttachments>()
+                            .Name("grid")
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                    .Read(read => read.Action("GridAttachment_Read", "ServiceTalkFlyer", Model))
+                                    .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "ServiceTalkFlyer", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                 .Model(m =>
+                                         {
+                                     m.Id("id");
+                                 })
+                                 .Parse(@<text>
+                                            function(response) {
+                                            return response.result;
+                                            }
+                                </text>)
+                          .Data("data")
+                          .Total("total")
+                          )
+                      )
+                      .Columns(columns =>
+                      {
+                      columns.Bound(typeof(string), "title").Title("Title");
+                      columns.Bound(typeof(string), "storageUrl").ClientTemplate(
+                      "#=GetMyImage(data.storageUrl)#").Width(240)
+                      .Title("Image");
+                      columns.Command(commands =>
+                      {
+                          commands.Destroy().Text("Hapus");
+                          }).Width(250);
+                      })
+                )
+                <br />
+
+                <!--Form Document-->
+                <form asp-action="EditAttachment">
+                    @if (!string.IsNullOrEmpty(ViewBag.resultDocument))
+                    {
+                        <div class="alert bg-cyan alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                            @ViewBag.resultDocument
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label class="control-label">Tambah dokumen baru</label><br />
+                        <input asp-for="Id" hidden />
+                        @(Html.Kendo().Upload()
+                            .Name("documents")
+                            .Multiple(true)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".xls", ".xlsx",".pdf", ".doc", ".docx" }))
+
+                        )
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button asp-action="Index" class="btn btn-default">Cancel</button>
+                    </div>
+                    @(Html.Kendo().Grid<MPM.FLP.FLPDb.ServiceTalkFlyerAttachments>()
+                            .Name("gridDocument")
+                            .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .Type("aspnetmvc-ajax")
+                                 .ServerPaging(false)
+                                 .ServerSorting(false)
+                                 .ServerFiltering(false)
+                                 .Transport(transport => transport
+                                             .Read(read => read.Action("GridAttachmentDocument_Read", "ServiceTalkFlyer", Model))
+                                             .Destroy(destroy => destroy.Action("GridAttachment_Destroy", "ServiceTalkFlyer", new { modelId = Model.Id }))
+                                 )
+                                 .Schema(schema => schema
+                                     .Model(m =>
+                                             {
+                                         m.Id("id");
+                                         m.Field("title", typeof(string));
+                                         m.Field("storageUrl", typeof(string));
+                                         m.Field("salesTalkId", typeof(string));
+                                     })
+                                     .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                              .Data("data")
+                              .Total("total")
+                          )
+                  )
+                  .Columns(columns =>
+                  {
+                      columns.Bound(typeof(string), "fileName").Title("Judul");
+                      columns.Bound(typeof(string), "storageUrl").Title("Dokumen").Width(240);
+                      columns.Command(commands =>
+                      {
+                          commands.Destroy().Text("Hapus");
+                      }).Width(250);
+                  })
+                    )
+                </form>
+
+                <br />
+            </div>
+        </div>
+        
+        <script>
+            function GetMyImage(image)
+            {
+                var returnString = 'No Image Found';
+
+                // just checking to see if we have a name for the image
+                if (image != null && image.length > 0) {
+                    returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    return returnString;
+                } else
+                    return "";
+            }        
+
+        </script>
+    </div>
+</div>
+
+<script>
+
+    $(function() {
+        // The Name() of the Grid is used to get its client-side instance.
+        var SalesTalkAttachments = $("#SalesTalkAttachments").data("kendoGrid");
+    });
+
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

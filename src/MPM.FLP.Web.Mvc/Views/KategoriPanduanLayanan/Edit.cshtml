@@ -1,0 +1,78 @@
+﻿@model MPM.FLP.FLPDb.GuideCategories
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Ubah Kategori Panduan</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+                <form id="form" asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label><br />
+                        <input asp-for="Name" class="k-textbox" style="width:100%" required />
+                        <input asp-for="CreatorUsername" hidden />
+                        <input asp-for="CreationTime" hidden />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Order" class="control-label"></label><br />
+                        <input asp-for="Order" type="number" onkeydown="javascript: return event.keyCode === 8 || event.keyCode === 46 ? true : !isNaN(Number(event.key))" class="k-textbox" min="1" value="@Model.Order" />
+                        <span asp-validation-for="Order" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="IsPublished" class="control-label"></label>
+                        <div class="checkbox">
+                            <div class="switch">
+                                <label>OFF<input asp-for="IsPublished" type="checkbox" value="true"><span class="lever"></span>ON</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IsPublished" class="text-danger"></span>
+                    </div>
+                </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Perbaharui</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+<script>
+    const numInputs = document.querySelectorAll('input[type=number]')
+
+    numInputs.forEach(function(input) {
+      input.addEventListener('change', function(e) {
+        if (e.target.value == '') {
+          e.target.value = 0
+        }
+      })
+    })
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.location.href = '@Url.Action("BackToIndex", "KategoriPanduanLayanan")';
+        //window.history.back();
+    }
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

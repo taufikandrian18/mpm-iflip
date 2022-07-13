@@ -1,0 +1,124 @@
+﻿@model MPM.FLP.FLPDb.SalesTalks
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Sales Talk Baru</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+            <form id="form" asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label><br />
+                    <input asp-for="Title" class="k-textbox" style="width:100%" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Contents" class="control-label">Description</label><br />
+                    @(Html.Kendo().EditorFor(e => e.Contents)
+                    .HtmlAttributes(new { style = "width:100%; height:440px" })
+                        .Tools(tools => tools
+                          .Clear()
+                          .Bold().Italic().Underline().Strikethrough()
+                          .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+                          .InsertUnorderedList().InsertOrderedList()
+                          .Outdent().Indent()
+                          //.Formatting()
+                          //.CleanFormatting()
+                          .FontName()
+                          .FontSize()
+                          .ForeColor().BackColor()
+                      )
+                    )
+                    <span asp-validation-for="Contents" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="StartDate" class="control-label"></label>
+                    <br />
+                    @(Html.Kendo().DatePickerFor(e => e.StartDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                    )
+                    @*<input asp-for="StartDate" type="date" class="form-control" />*@
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EndDate" class="control-label"></label>
+                    <br />
+                    @(Html.Kendo().DatePickerFor(e => e.EndDate)
+                                  .HtmlAttributes(new { style = "width: 200px" })
+                                  .Value(DateTime.Now)
+                    )
+                    @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Image </label>
+                    <br />
+                    @(Html.Kendo().Upload()
+                        .Name("files")
+                        .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                    )
+                    @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Document </label>
+                    <br />
+                    @(Html.Kendo().Upload()
+                        .Name("documents")
+                        .Validation(validation => validation.AllowedExtensions(new string[] { ".xls", ".xlsx", ".pdf", ".docx", ".doc" }))
+                    )
+                    @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                </div>
+                <div class="form-group">
+                    <label asp-for="ReadingTime" class="control-label">Minimal Waktu Pembacaan (detik)</label><br />
+                    <input type="number" min="0" asp-for="ReadingTime" id="txtPoint" class="k-textbox" style="width:100%" required />
+                    @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                </div>
+                <div class="form-group">
+                    <label asp-for="IsPublished" class="control-label"></label>
+                    <div class="checkbox">
+                        <div class="switch">
+                            <label>OFF<input asp-for="IsPublished" type="checkbox" checked=""><span class="lever"></span>ON</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="IsPublished" class="text-danger"></span>
+                </div>
+            </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Buat</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.location.href = '@Url.Action("Index", "SalesTalks")';
+    }
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

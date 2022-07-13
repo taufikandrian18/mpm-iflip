@@ -1,0 +1,172 @@
+﻿@model MPM.FLP.FLPDb.ProductCatalogs
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Katalog Produk </h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+                <form id="form" asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label">Nama Produk</label><br />
+                        <input asp-for="Title" class="k-textbox" style="width:100%" required />
+                        <input asp-for="CreatorUsername" hidden />
+                        <input asp-for="CreationTime" hidden />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ProductCategoryId" class="control-label"> Kategori Produk </label><br />
+                        @(Html.Kendo().ComboBoxFor(m => m.ProductCategoryId)
+                          .DataTextField("name")
+                          .DataValueField("id")
+                          .Placeholder("Select Category")
+                          .HtmlAttributes(new { style = "width:30%;" })
+                          .AutoBind(true)
+                          .MinLength(3)
+                          .DataSource(source => source
+                                .Custom()
+                                           .ServerFiltering(true)
+                                           .Type("aspnetmvc-ajax")
+                                .Transport(transport => transport
+                                    .Read(read =>
+                                    {
+                                        read.Action("GetCategorys", "ProductCatalog");
+                                    })
+                                )
+                                .Schema(schema => schema
+                                    .Data("data")
+                                    .Model(model =>
+                                    {
+                                        model.Id("id");
+                                        model.Field("name", typeof(string));
+                                    })
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+)
+)
+                        )
+                        @*<input asp-for="GuideCategoryId" class="form-control" />*@
+                        <span asp-validation-for="ProductCategoryId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"> Image </label>
+                        <br />
+                        @(Html.Kendo().Upload()
+                            .Name("files")
+                            .Multiple(false)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                        )
+                        @if (Model.FeaturedImageUrl != null)
+                        {
+                            <img src="@Model.FeaturedImageUrl" class="img-thumbnail" width="200" height="200" />
+                            <input asp-for="FeaturedImageUrl" hidden />
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"> TVC VIDEO ID </label>
+                        <br />
+                        @(Html.Kendo().Upload()
+                            .Name("tvcvideo1")
+                            .Multiple(false)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".mp4" }))
+                        )
+                        <video width="400" controls>
+                            <source src="@Model.ProductCatalogAttachments.Where(x=>x.Title.Contains("TVCVIDEO1")).FirstOrDefault()?.StorageUrl" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                        @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"> TVC VIDEO ID - 2 </label>
+                        <br />
+                        @(Html.Kendo().Upload()
+                            .Name("tvcvideo2")
+                            .Multiple(false)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".mp4" }))
+                        )
+                        <video width="400" controls>
+                            <source src="@Model.ProductCatalogAttachments.Where(x=>x.Title.Contains("TVCVIDEO2")).FirstOrDefault()?.StorageUrl" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                        @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"> TVC VIDEO ID - 3 </label>
+                        <br />
+                        @(Html.Kendo().Upload()
+                            .Name("tvcvideo3")
+                            .Multiple(false)
+                            .Validation(validation => validation.AllowedExtensions(new string[] { ".mp4" }))
+                        )
+                        <video width="400" controls>
+                            <source src="@Model.ProductCatalogAttachments.Where(x=>x.Title.Contains("TVCVIDEO3")).FirstOrDefault()?.StorageUrl" type="video/mp4">
+                            Your browser does not support HTML5 video.
+                        </video>
+                        @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Order" class="control-label">Urutan</label><br />
+                        <input asp-for="Order" type="number" onkeydown="javascript: return event.keyCode === 8 || event.keyCode === 46 ? true : !isNaN(Number(event.key))" class="k-textbox" min="1" value="@Model.Order" />
+                        <span asp-validation-for="Order" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="IsPublished" class="control-label"></label>
+                        <div class="checkbox">
+                            <div class="switch">
+                                <label>OFF<input asp-for="IsPublished" type="checkbox" value="true"><span class="lever"></span>ON</label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IsPublished" class="text-danger"></span>
+                    </div>
+                </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Perbaharui</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const numInputs = document.querySelectorAll('input[type=number]')
+
+    numInputs.forEach(function(input) {
+      input.addEventListener('change', function(e) {
+        if (e.target.value == '') {
+          e.target.value = 0
+        }
+      })
+    })
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.location.href = '@Url.Action("BackToIndex", "ProductCatalog")';
+        //window.history.back();
+    }
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

@@ -1,0 +1,142 @@
+﻿@model MPM.FLP.Web.Models.FLPMPM.QuestionsVM
+
+@{
+    ViewData["Title"] = "EditQuestion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Soal Live Quiz </h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("EditQuestion", "LiveQuiz", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input asp-for="ParentId" hidden />
+                            <input asp-for="Id" hidden />
+                            <input asp-for="CreationTime" hidden />
+                            <input asp-for="CreatorUsername" hidden />
+                            <div class="form-group">
+                                <label asp-for="Question" class="control-label">Pertanyaan</label><br />
+                                <textarea asp-for="Question" class="k-textbox" style="width:100%" rows="5" required> </textarea>
+
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"> Gambar </label>
+                                <br />
+                                <img src="@Model.ImageUrl" width="200" height="200" class="image img-thumbnail" />
+                                <input asp-for="ImageUrl" hidden />
+                                <br />
+                                @(Html.Kendo().Upload()
+                                    .Name("images")
+                                    .Multiple(false)
+                                    .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                                )
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OptionA" class="control-label">Opsi A</label><br />
+                                <input asp-for="OptionA" class="k-textbox" style="width:100%" required />
+
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OptionB" class="control-label">Opsi B</label><br />
+                                <input asp-for="OptionB" class="k-textbox" style="width:100%" required />
+
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OptionC" class="control-label">Opsi C</label><br />
+                                <input asp-for="OptionC" class="k-textbox" style="width:100%" required />
+
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OptionD" class="control-label">Opsi D</label><br />
+                                <input asp-for="OptionD" class="k-textbox" style="width:100%" required />
+
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OptionE" class="control-label">Opsi E</label><br />
+                                <input asp-for="OptionE" class="k-textbox" style="width:100%" required />
+
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="CorrectOption" class="control-label">Jawaban benar</label><br />
+                                @(Html.Kendo().DropDownListFor(x => x.CorrectOption)
+                                  .BindTo(new List<string>() {
+                                      "A",
+                                      "B",
+                                      "C",
+                                      "D",
+                                      "E"
+                                  })
+                                 .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" id="btnSubmit" value="Ubah" class="btn btn-primary" />
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+                    
+                </div>
+                @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+
+    $(document).ready(function () {
+
+        $('form').submit(function (event) {
+
+            event.preventDefault();            
+
+            var formdata = new FormData($('#formCreate').get(0)); 
+
+            $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("EditQuestion", "LiveQuiz")',
+                    data: formdata,
+                    dataType: "json",
+                    processData: false, 
+                    contentType: false, 
+                    success: function (response) {
+                        abp.ui.clearBusy();
+                        
+                        window.location.href = '@Url.Action("LiveQuestion", "LiveQuiz")'+ '/' + response.result.message;
+                    }   
+                });  
+                
+        }); 
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("LiveQuestion", "LiveQuiz")'+ '/' +  "@Model.ParentId";
+        //window.history.back();
+    };
+
+    
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

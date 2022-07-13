@@ -1,0 +1,558 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.SelfRecordingResults
+@{
+    ViewData["Title"] = "SelfRecording";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Self Recording Result Validation
+                </h2>
+            </div>
+            <div class="body">
+                
+                <div class="row">
+                    <div class="form-group">
+
+                        <button id="backToIndex" class="btn btn-primary" onclick="BackToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+
+                        @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                        @*<button asp-action="Index" class="btn btn-default">Kembali</button>*@
+                    </div>
+                    <div style="vertical-align:middle;text-align:center">
+                        <div id="videoView"></div>
+                        @*<video id="videoResult" width="320" height="240" controls="">
+                            <source type="video/mp4">
+                            Sorry, your browser doesn't support the video element.
+                        </video>*@
+                    </div>
+                    @*<input type='hidden' name='before_point_#=data.id#' value='Accepted'/>*@
+                    @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.RoleplayResultDetailVM>()
+                                  .Name("grid")
+                                  //.ToolBar(tools =>
+                                  //{
+                                  //    tools.Custom().Text("Tambah Detail Baru").HtmlAttributes(new { Href = Url.Action("CreateDetail", "Roleplay", Model) });
+                                  //})
+                                  .DataSource(dataSource => dataSource
+                                      .Ajax()
+                                      //.PageSize(10)
+                                      .Read(read => read.Action("Grid_Validate_Read", "SelfRecording", Model)
+
+                                   )
+                                 )
+                              .Columns(columns =>
+                              {
+                                  columns.Bound(c => c.title).Title("Title").Width(200)
+                                    .ClientFooterTemplate("<br/>" +
+                                    "<div><p> Total checklist (v) </p></div> <br />" +
+                                    "<div><p> Total Point </p></div><br />" +
+                                    "<div><p> Result </p></div><br />" +
+                                    "<div><p> Mandatory Item </p></div><br />" +
+                                    "<div><p> Final Result </p></div><br />").Lockable(false).Locked(true);
+                                  columns.Group(g => g.Title("Before").Columns(before =>
+                                  {
+                                      before.Template("<input type='radio' id='before_pass_#=data.id#' name='before_point_#=data.id#' value='pass' disabled='disabled'/><label for='before_pass_#=data.id#'></label> ").Width(150).Title("Pass").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("" +
+                                        "<div><p id='before_pass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='beforepoint_pass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='before_result'></p></div><br/>" +
+                                        "<div><p id='before_mandatory'></p></div><br/>" +
+                                        "<div><p>-</p></div>");
+                                      before.Template("<input type='radio' id='before_notpass#=data.id#' name='before_point_#=data.id#' value='not pass' disabled='disabled'/><label for='before_notpass#=data.id#'></label>").Width(150).Title("Not Pass").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("" +
+                                        "<div><p id='before_notpass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='beforepoint_notpass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div>");
+                                      before.Template("<input type='radio' id='before_dismiss#=data.id#' name='before_point_#=data.id#' value='dismiss' disabled='disabled'/><label for='before_dismiss#=data.id#'></label>").Width(150).Title("Dismiss").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("" +
+                                        "<div><p id='before_dismiss_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='beforepoint_dismiss_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div>");
+                                  })
+                                  );
+                                  columns.Group(g => g.Title("After").Columns(after =>
+                                  {
+                                      after.Template("<input type='radio' id='after_pass_#=data.id#' name='point_#=data.id#' value='pass' onclick='handlePoint(this)'/><label for='after_pass_#=data.id#'></label>").Width(150).Title("Pass").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("<br/>" +
+                                        "<div><p id='after_pass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='afterpoint_pass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='after_result'></p></div><br/>" +
+                                        "<div><p id='after_mandatory'></p></div><br/>" +
+                                        "<div><p id='after_final'></p></div><br/>");
+                                      after.Template("<input type='radio' id='after_notpass#=data.id#' name='point_#=data.id#' value='not pass' onclick='handlePoint(this)'/><label for='after_notpass#=data.id#'></label>").Width(150).Title("Not Pass").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("" +
+                                        "<div><p id='after_notpass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='afterpoint_notpass_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div>");
+                                      after.Template("<input type='radio' id='after_dismiss#=data.id#' name='point_#=data.id#' value='dismiss' onclick='handlePoint(this)'/><label for='after_dismiss#=data.id#'></label>").Width(150).Title("Dismiss").HtmlAttributes(new { style = "vertical-align: middle;text-align:center;" })
+                                      .ClientFooterTemplate("" +
+                                        "<div><p id='after_dismiss_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p id='afterpoint_dismiss_tick' style='text-align:center'></p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div><br/>" +
+                                        "<div><p>-</p></div>");
+                                  })
+                                  );
+                                  columns.Bound(typeof(string), "isMandatorySilver").ClientTemplate("#=ShowValue(data.isMandatorySilver,data.isMandatoryGold,data.isMandatoryPlatinum)#")
+             .Title("Mandatory").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100);
+                                  //columns.Bound(typeof(string), "id").Title("Id MPM").Width(100);
+                                  //columns.Bound(typeof(string), "namaFLP").Title("Nama FLP").Width(200);
+                                  //columns.Bound(typeof(string), "flpResult").Title("FLP Result").Width(200);
+                                  //columns.Command(commands =>
+                                  //                                           {
+                                  //    commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "View" }).IconClass("glyphicon glyphicon-cog").Click("GoToEditPage");
+                                  //    commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                                  //}).Title("Aksi").Width(180);
+                              })
+                           //.Pageable()
+                           .Sortable()
+                           .Scrollable(sc => sc.Height("700px"))
+                           .Resizable(resize => resize.Columns(true))
+                           .Events(e => e.DataBound("onDataBound"))
+                    //.HtmlAttributes(new { style = "height: 2000px" })
+                    )
+
+                    <div class="form-group" style="margin-top:10px">
+                        <button class="btn btn-primary pull-right" id="btn_validate">Validate</button>
+                        <button class="btn btn-info pull-right" id="btn_save" style="margin-right:10px">Save</button>
+                    </div>
+                </div>
+                
+                <script>
+                    var after_pass = 0;
+                    var after_notpass = 0;
+                    var after_dismiss = 0;
+                    var after_total_point = 0;
+
+                    var before_pass = 0;
+                    var before_notpass = 0;
+                    var before_dismiss = 0;
+                    var before_total_point = 0;
+
+                    var last_value = "";
+                    var before_last_value = "";
+                    var last_name = "";
+                    var total = 0;
+                    var totalPoint = 0;
+
+                    function onDataBound(){
+                        abp.ui.setBusy();
+                        var video = document.getElementById("videoResult");
+                        var parameter = { id : "@Model.Id"};
+                        $.ajax({
+                            url: "@Url.Action("GetUrl","SelfRecording")",
+                            data: parameter,
+                            dataType: "json",
+                            type: 'POST',
+                            traditional: true,
+                            success: function (response) {
+                                if (response.result.isYoutube) {
+                                    $("#videoView").html( "<iframe id='videoYoutube' width='420' height='345' ></iframe>" );
+                                    var video = document.getElementById("videoYoutube");
+                                    var tmp = response.result.url.split("/");
+                                    var tmpId = "https://www.youtube.com/embed/" + tmp[3];
+                                    video.src = tmpId;
+                                } else {
+                                    $("#videoView").html("<video id='videoResult' width='420' height='345' controls=''><source type='video/mp4'>Sorry, your browser doesn't support the video element.</video>");
+                                    var video = document.getElementById("videoResult");
+                                    video.src = response.result.url;
+                                    video.load();
+                                }
+                            },
+                            error: function (response) {
+
+                            }
+                        });
+                        
+                        var listRadio = $(':radio[id^="after_pass_"][name^="point_"]');
+                        var listRadioId = [];
+                        $.each(listRadio, function (index, item) {
+                            listRadioId.push(item.name.substring(6));
+                        });
+
+                        var grid = $("#grid").data("kendoGrid").dataSource.data();
+
+                        $.each(listRadioId, function (index, item) {
+                            var data = $.grep(grid, function (p) { return p.id == item; })
+                                .map(function (p) { return p; });
+                            if (data[0].afterPassed) {
+                                $("input:radio[name='point_" + item + "'][value='pass']").attr('checked', true);
+                            } else if (data[0].afterNotPassed) {
+                                $("input:radio[name='point_" + item + "'][value='not pass']").attr('checked', true);
+                            } else if (data[0].afterDismiss) {
+                                $("input:radio[name='point_" + item + "'][value='dismiss']").attr('checked', true);
+                            }
+
+                            if (data[0].beforePassed) {
+                                $("input:radio[name='before_point_" + item + "'][value='pass']").attr('checked', true).attr('disabled', false);
+                            } else if (data[0].beforeNotPassed) {
+                                $("input:radio[name='before_point_" + item + "'][value='not pass']").attr('checked', true).attr('disabled', false);
+                            } else if (data[0].beforeDismiss) {
+                                $("input:radio[name='before_point_" + item + "'][value='dismiss']").attr('checked', true).attr('disabled', false);
+                            }
+                        });
+
+                        var totalPointBefore = "@Model.FLPResult";
+                        var result = "";
+
+                        if (totalPointBefore < 50) {
+                            result = "Bronze (" + totalPointBefore + "%)";
+                        } else if (totalPointBefore >= 50 && totalPointBefore < 70) {
+                            result = "Silver (" + totalPointBefore + "%)";
+                        } else if (totalPointBefore >= 70 && totalPointBefore < 90) {
+                            result = "Gold (" + totalPointBefore + "%)";
+                        } else if (totalPointBefore >= 90) {
+                            result = "Platinum (" + totalPointBefore + "%)";
+                        }
+
+                        document.getElementById('before_result').innerHTML = result;
+
+                        document.getElementById('before_pass_tick').innerHTML = before_pass;
+                        document.getElementById('before_notpass_tick').innerHTML = before_notpass;
+                        document.getElementById('before_dismiss_tick').innerHTML = before_dismiss;
+
+                        document.getElementById('beforepoint_pass_tick').innerHTML = 0;
+                        document.getElementById('beforepoint_notpass_tick').innerHTML = 0;
+                        document.getElementById('beforepoint_dismiss_tick').innerHTML = 0;
+
+                        document.getElementById('afterpoint_notpass_tick').innerHTML = 0;
+                        document.getElementById('afterpoint_dismiss_tick').innerHTML = 0;
+
+                        $.ajax({
+                            url: "@Url.Action("GetMandatory","SelfRecording")",
+                            data: parameter,
+                            dataType: "json",
+                            type: 'POST',
+                            traditional: true,
+                            success: function (response) {
+                                document.getElementById('before_mandatory').innerHTML = response.result.value;
+
+                                document.getElementById('after_mandatory').innerHTML = response.result.value;
+                            },
+                            error: function (response) {
+
+                            }
+                        });
+
+                        var state = "@Model.IsVerified";
+                        if (state) {
+                            document.getElementById('btn_validate').style.visibility = "hidden";
+                            document.getElementById('btn_save').style.visibility = "hidden";
+                        }
+
+                        calculatePoint();
+
+                        
+                    };
+
+                    function calculatePoint() {
+
+                        abp.ui.setBusy();
+                        var list_after_pass = $(':radio[name^="point_"][value="pass"]:checked');
+                        var list_after_dismiss = $(':radio[name^="point_"][value="dismiss"]:checked');
+                        var list_before_pass = $(':radio[name^="before_point_"][value="pass"]:checked');
+                        var list_before_dismiss = $(':radio[name^="before_point_"][value="dismiss"]:checked');
+
+                        after_pass = $(':radio[name^="point_"][value="pass"]:checked').length;
+                        after_notpass = $(':radio[name^="point_"][value="not pass"]:checked').length;
+                        after_dismiss = $(':radio[name^="point_"][value="dismiss"]:checked').length;
+
+                        before_pass = $(':radio[name^="before_point_"][value="pass"]:checked').length;
+                        before_notpass = $(':radio[name^="before_point_"][value="not pass"]:checked').length;
+                        before_dismiss = $(':radio[name^="before_point_"][value="dismiss"]:checked').length;
+
+                        after_total_point = after_pass;
+                        document.getElementById('after_pass_tick').innerHTML = after_pass;
+                        document.getElementById('after_notpass_tick').innerHTML = after_notpass;
+                        document.getElementById('after_dismiss_tick').innerHTML = after_dismiss;
+                        document.getElementById('afterpoint_pass_tick').innerHTML = after_total_point;
+
+                        document.getElementById('before_pass_tick').innerHTML = before_pass;
+                        document.getElementById('before_notpass_tick').innerHTML = before_notpass;
+                        document.getElementById('before_dismiss_tick').innerHTML = before_dismiss;
+
+                        var validations = [];
+                        $.each(list_after_pass, function (index, item) {
+                            var validation = { Id: item.name.substring(6), Condition: "pass", ResultId : '@Model.Id' };
+                            validations.push(validation);
+                        });
+                        $.each(list_after_dismiss, function (index, item) {
+                            var validation = { Id: item.name.substring(6), Condition: "dismiss", ResultId : '@Model.Id' };
+                            validations.push(validation);
+                        });
+                        
+                        $.ajax({
+                            contentType: 'application/json; charset=utf-8',
+                            datatype: "json",
+                            url: "@Url.Action("CalculatePoint","SelfRecording")",
+                            type: 'POST',
+                            data: JSON.stringify(validations),
+                            success: function (response) {
+                                totalPoint = response.result.value;
+                                var result = "";
+                                if (totalPoint < 50) {
+                                    result = "Bronze (" + totalPoint + "%)";
+                                } else if (totalPoint >= 50 && totalPoint < 70) {
+                                    result = "Silver (" + totalPoint + "%)";
+                                } else if (totalPoint >= 70 && totalPoint < 90) {
+                                    result = "Gold (" + totalPoint + "%)";
+                                } else if (totalPoint >= 90) {
+                                    result = "Platinum (" + totalPoint + "%)";
+                                }
+
+                                document.getElementById('after_result').innerHTML = result;
+                                document.getElementById('after_final').innerHTML = result;
+                                //console.log(response.result.value);
+                                abp.ui.clearBusy();
+                            },
+                            error: function (response) {
+
+                            }
+                        });
+
+                        //total = $('#grid').data('kendoGrid').dataSource.total();
+                        //totalPoint = (after_pass / (total - after_dismiss)) * 100;
+                        //var result = "";
+                        //if (totalPoint < 50) {
+                        //    result = "Bronze (" + totalPoint + "%)";
+                        //} else if (totalPoint >= 50 && totalPoint < 70) {
+                        //    result = "Silver (" + totalPoint + "%)";
+                        //} else if (totalPoint >= 70 && totalPoint < 90) {
+                        //    result = "Gold (" + totalPoint + "%)";
+                        //} else if (totalPoint >= 90) {
+                        //    result = "Platinum (" + totalPoint + "%)";
+                        //}
+
+                        //document.getElementById('after_result').innerHTML = result;
+                        //document.getElementById('after_final').innerHTML = result;
+
+                        validations = [];
+                        $.each(list_before_pass, function (index, item) {
+                            var validation = { Id: item.name.substring(13), Condition: "pass", ResultId : '@Model.Id' };
+                            validations.push(validation);
+                        });
+                        $.each(list_before_dismiss, function (index, item) {
+                            var validation = { Id: item.name.substring(13), Condition: "dismiss", ResultId : '@Model.Id' };
+                            validations.push(validation);
+                        });
+
+                        @*var totalPointBefore = 0;
+                        $.ajax({
+                            contentType: 'application/json; charset=utf-8',
+                            datatype: "json",
+                            url: "@Url.Action("CalculatePoint","Roleplay")",
+                            type: 'POST',
+                            data: JSON.stringify(validations),
+                            success: function (response) {
+                                totalPointBefore = response.result.value;
+                                result = "";
+                                if (totalPointBefore < 50) {
+                                    result = "Bronze (" + totalPointBefore + "%)";
+                                } else if (totalPointBefore >= 50 && totalPointBefore < 70) {
+                                    result = "Silver (" + totalPointBefore + "%)";
+                                } else if (totalPointBefore >= 70 && totalPointBefore < 90) {
+                                    result = "Gold (" + totalPointBefore + "%)";
+                                } else if (totalPointBefore >= 90) {
+                                    result = "Platinum (" + totalPointBefore + "%)";
+                                }
+                                document.getElementById('before_result').innerHTML = result;
+
+                                abp.ui.clearBusy();
+                                //console.log(response.result.value);
+                            },
+                            error: function (response) {
+
+                            }
+                        });*@
+
+                        //var totalPointBefore = (before_pass / (total - before_dismiss)) * 100;
+                        //result = "";
+                        //if (totalPointBefore < 50) {
+                        //    result = "Bronze (" + totalPointBefore + "%)";
+                        //} else if (totalPointBefore >= 50 && totalPointBefore < 70) {
+                        //    result = "Silver (" + totalPointBefore + "%)";
+                        //} else if (totalPointBefore >= 70 && totalPointBefore < 90) {
+                        //    result = "Gold (" + totalPointBefore + "%)";
+                        //} else if (totalPointBefore >= 90) {
+                        //    result = "Platinum (" + totalPointBefore + "%)";
+                        //}
+                        //document.getElementById('before_result').innerHTML = result;
+
+                        //abp.ui.clearBusy();
+                    }
+
+                    function handlePoint(e) {
+
+                        var value = e.value;
+                        calculatePoint();
+                    }
+
+                    function ShowValue(silver, gold, platinum) {
+                        var value = "";
+                        if (silver) {
+                            value = "S";
+                        }
+                        if (gold) {
+                            if (value != "") {
+                                value += " G"
+                            } else {
+                                value = "G"
+                            }
+                        }
+                        if (platinum) {
+                            if (value != "") {
+                                value += " P"
+                            } else {
+                                value = "P";
+                            }
+                        }
+                        return value;
+                    }
+                    @*function goToClaimedPage(e) {
+                            window.location.href = '@Url.Action("ClaimedPeople", "Roleplay")' + '/' + e;
+                    }*@
+                    $(document).ready(function () {
+
+                        $("#btn_validate").click(function () {
+                            var listItemPass = $(':radio[name^="point_"][value="pass"]:checked');
+                            var listItemNotPass = $(':radio[name^="point_"][value="not pass"]:checked');
+                            var listItemDismiss = $(':radio[name^="point_"][value="dismiss"]:checked');
+
+                            
+                            if (confirm("Apakah data yang akan di validasi sudah sesuai?")) {
+
+                                abp.ui.setBusy();
+
+                                var listPassId = [];
+                                var listNotPassId = [];
+                                var listDismissId = [];
+
+                                $.each(listItemPass, function (index, value) {
+                                    listPassId.push(value.name.substring(6));
+                                });
+
+                                $.each(listItemNotPass, function (index, value) {
+                                    listNotPassId.push(value.name.substring(6));
+                                });
+
+                                $.each(listItemDismiss, function (index, value) {
+                                    listDismissId.push(value.name.substring(6));
+                                });
+
+                                var parameter = {
+                                    pass: listPassId,
+                                    notpass: listNotPassId,
+                                    dismiss: listDismissId,
+                                    id: '@Model.Id',
+                                    resultVaildation: totalPoint
+                                };
+
+                                //console.log(listPassId);
+                                $.ajax({
+                                    url: "@Url.Action("Validate","SelfRecording")",
+                                    data: parameter,
+                                    dataType: "json",
+                                    type: 'POST',
+                                    traditional: true,
+                                    success: function (response) {
+                                        abp.ui.clearBusy();
+                                        window.location.href = "@Url.Action("BackToResult", "SelfRecording",Model)";
+                                        //var userList = response.result;
+                                        //userList.forEach(insertAssignedUser);
+                                    },
+                                    error: function (response) {
+
+                                    }
+                                });
+                            }
+                        });
+
+                        $("#btn_save").click(function () {
+                            var listItemPass = $(':radio[name^="point_"][value="pass"]:checked');
+                            var listItemNotPass = $(':radio[name^="point_"][value="not pass"]:checked');
+                            var listItemDismiss = $(':radio[name^="point_"][value="dismiss"]:checked');
+
+                            
+                            abp.ui.setBusy();
+
+                                var listPassId = [];
+                                var listNotPassId = [];
+                                var listDismissId = [];
+
+                                $.each(listItemPass, function (index, value) {
+                                    listPassId.push(value.name.substring(6));
+                                });
+
+                                $.each(listItemNotPass, function (index, value) {
+                                    listNotPassId.push(value.name.substring(6));
+                                });
+
+                                $.each(listItemDismiss, function (index, value) {
+                                    listDismissId.push(value.name.substring(6));
+                                });
+
+                                var parameter = {
+                                    pass: listPassId,
+                                    notpass: listNotPassId,
+                                    dismiss: listDismissId,
+                                    id: '@Model.Id',
+                                    resultVaildation: totalPoint
+                                };
+
+                                //console.log(listPassId);
+                                $.ajax({
+                                    url: "@Url.Action("SaveValidation","SelfRecording")",
+                                    data: parameter,
+                                    dataType: "json",
+                                    type: 'POST',
+                                    traditional: true,
+                                    success: function (response) {
+                                        abp.ui.clearBusy();
+                                        alert("Data berhasil disimpan");
+                                        //var userList = response.result;
+                                        //userList.forEach(insertAssignedUser);
+                                    },
+                                    error: function (response) {
+
+                                    }
+                                });
+                        });
+                    });
+                    
+
+                    
+
+                    function BackToIndex() {
+                       
+                       window.location.href = "@Url.Action("BackToResult", "SelfRecording",  new { id = Model.Id})";
+                        //window.history.back();
+                    };
+                    //function GetMyImage(image)
+                    //{
+                    //   var returnString = 'No Image Found';
+
+                    //        //just checking to see if we have a name for the image
+                    //    if (image != null && image.length > 0) {
+                    //        returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    //        return returnString;
+                    //    } else
+                    //        return "";
+                    //}
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+

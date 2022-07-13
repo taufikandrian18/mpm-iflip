@@ -1,0 +1,110 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.ClubCommunities
+@{
+    ViewData["Title"] = "ClubCommunities";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Klub dan Komunitas
+                </h2>
+                @*<ul class="header-dropdown m-r--5">
+            <li class="dropdown">
+                <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li><a id="RefreshButton" href="javascript:void(0);" class="waves-effect waves-block"><i class="material-icons">refresh</i>Refresh</a></li>
+                </ul>
+            </li>
+        </ul>*@
+            </div>
+            <div class="body">
+                @(Html.Kendo().Grid<MPM.FLP.FLPDb.ClubCommunities>()
+                              .Name("grid")
+                              .ToolBar(tools =>
+                              {
+                                  tools.Custom().Text("Tambah Klub dan Komunitas Baru").HtmlAttributes(new { Href = Url.Action("Create", "ClubCommunities") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action("Grid_Read", "ClubCommunities"))
+                                                .Destroy(destroy => destroy.Action("Grid_Destroy", "ClubCommunities"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                         .Data("data")
+                         .Total("total")
+                         )
+                       )
+                    .Columns(columns =>
+                    {
+                        columns.Bound(typeof(string), "name").Title("Nama").Filterable(true);
+                         columns.Bound(typeof(string), "contactPerson").Title("Nama Kontak").Filterable(true);
+                         columns.Bound(typeof(string), "contactNumber").Title("Nomor Kontak").Filterable(false);
+                         columns.Bound(typeof(string), "email").Title("E-mail").Filterable(true);
+                         columns.Bound(typeof(string), "kota").Title("Kota").Filterable(true);
+                        columns.Command(commands =>                                 {
+                            commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "Ubah" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                            //commands.Custom("Attachment").Text(" ").HtmlAttributes(new { @class = "btn btn-warning", @style = "color:white;", @title = "Tautan" }).IconClass("glyphicon glyphicon-file").Click("goToAttachmentPage");
+                            commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus"}).IconClass("glyphicon glyphicon-trash");
+                        }).Width(200);
+                    })
+                 .Pageable()
+                 .Sortable()
+                 .Filterable(filterable => filterable
+                    .Extra(false)
+                    .Operators(operators => operators
+                    .ForString(str => str.Clear()
+                        .IsEqualTo("Is equal to")
+                        .Contains("Contains")
+                    ))
+                  )
+                )
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "ClubCommunities")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found'; 
+
+                            //just checking to see if we have a name for the image 
+                        if (image != null && image.length > 0) {
+                            returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }    
+                </script>
+                
+            </div>
+        </div>
+    </div>
+</div>
+

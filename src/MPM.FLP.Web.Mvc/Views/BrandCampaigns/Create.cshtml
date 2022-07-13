@@ -1,0 +1,98 @@
+﻿@model MPM.FLP.FLPDb.BrandCampaigns
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Tambah Brand Campaigns</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+            <form id="form" asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label">Judul</label><br />
+                    <input type="text" asp-for="Title" class="k-textbox" style="width:100%" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"> Gambar </label>
+                    <br />
+                    @(Html.Kendo().Upload()
+                        .Name("images")
+                        .Validation(validation => validation.AllowedExtensions(new string[] { ".jpeg", ".jpg", ".png" }))
+                        .Multiple(true)
+                        .HtmlAttributes(new { style = "width:40%;" })
+                    )
+                    @*<input asp-for="EndDate" type="date" class="form-control" />*@
+                </div>
+                <div class="form-group">
+                    <label asp-for="Contents" class="control-label">Deskripsi</label> <br />
+                    @(Html.Kendo().EditorFor(e => e.Contents)
+                        .HtmlAttributes(new { style = "width:100%; height:440px" })
+                        .Tools(tools => tools
+                          .Clear()
+                          .Bold().Italic().Underline().Strikethrough()
+                          .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+                          .InsertUnorderedList().InsertOrderedList()
+                          .Outdent().Indent()
+                          //.Formatting()
+                          //.CleanFormatting()
+                          .FontName()
+                          .FontSize()
+                          .ForeColor().BackColor()
+                      )
+                    )
+                    @Html.ValidationMessageFor(model => model.Contents)
+                    <span asp-validation-for="Contents" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ReadingTime" class="control-label">Minimal Waktu Pembacaan (detik)</label><br />
+                    <input type="number" min="0" asp-for="ReadingTime" id="txtPoint" class="k-textbox" style="width:100%" required />
+                    @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                </div>
+                <div class="form-group">
+                    <label asp-for="IsPublished" class="control-label">Tampilkan ?</label>
+                    <div class="checkbox">
+                        <div class="switch">
+                            <label>OFF<input asp-for="IsPublished" type="checkbox" checked=""><span class="lever"></span>ON</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="IsPublished" class="text-danger"></span>
+                </div>
+            </form>
+                <div class="form-group">
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="submitForm()">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitForm() {
+        $("#form").submit();
+    }
+    function backToIndex() {
+        window.location.href = '@Url.Action("Index", "BrandCampaigns")';
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

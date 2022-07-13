@@ -1,0 +1,150 @@
+﻿@*@model MPM.FLP.FLPDb.SalesTalks*@
+@model MPM.FLP.FLPDb.ClubCommunities
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Edit Klub dan Komunitas</h2>
+            </div>
+            <div class="body">
+                @if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                {
+                    <div class="alert bg-red alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @TempData["alert"]
+                    </div>
+                }
+            <form id="form" asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"> Nama Klub</label><br />
+                    <input asp-for="Name" class="k-textbox" style="width:100%" required />
+                    <input asp-for="CreatorUsername" hidden />
+                    <input asp-for="CreationTime" hidden />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ClubCommunityCategoryId" class="control-label"> Kategori Klub dan Komunitas </label><br />
+                    @(Html.Kendo().ComboBoxFor(m => m.ClubCommunityCategoryId)
+                      .DataTextField("name")
+                      .DataValueField("id")
+                      .Placeholder("Select Category")
+                      .HtmlAttributes(new { style = "width:30%;" })
+                      .AutoBind(true)
+                      .MinLength(3)
+                      .DataSource(source => source
+                            .Custom()
+                                       .ServerFiltering(true)
+                                       .Type("aspnetmvc-ajax")
+                            .Transport(transport => transport
+                                .Read(read =>
+                                {
+                                    read.Action("GetCategorys", "ClubCommunities");
+                                })
+                            )
+                            .Schema(schema => schema
+                                .Data("data")
+                                .Model(model =>
+                                {
+                                    model.Id("id");
+                                    model.Field("name", typeof(string));
+                                })
+                                .Parse(@<text>
+                                            function(response) {
+                                            return response.result;
+                                            }
+                                </text>)
+          )
+          )
+                    )
+                    @*<input asp-for="GuideCategoryId" class="form-control" />*@
+                    <span asp-validation-for="ClubCommunityCategoryId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ContactPerson" class="control-label">Nama Kontak</label><br />
+                    <input asp-for="ContactPerson" class="k-textbox" style="width:100%" required />
+                    <span asp-validation-for="ContactPerson" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ContactNumber" class="control-label">Nomor Kontak</label><br />
+                    <input asp-for="ContactNumber" type="tel" class="k-textbox" style="width:100%" pattern="[0-9]{12}" required />
+                    <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label">E-mail</label><br />
+                    <input asp-for="Email" type="email" class="k-textbox" style="width:100%" placeholder="flpmpm@email.com" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Kota" class="control-label">Kota</label><br />
+                    <input asp-for="Kota" class="k-textbox" style="width:100%" required />
+                    <span asp-validation-for="Kota" class="text-danger"></span>
+                </div>
+            </form>
+                <div class="form-group">
+                    <button type="submit" value="Edit" class="btn btn-primary" onclick="submitForm()">Perbaharui</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+        
+        <script>
+            const numInputs = document.querySelectorAll('input[type=number]')
+
+            numInputs.forEach(function(input) {
+              input.addEventListener('change', function(e) {
+                if (e.target.value == '') {
+                  e.target.value = 0
+                }
+              })
+            })
+
+            function submitForm() {
+                $("#form").submit();
+            }
+            function backToIndex() {
+               window.location.href = '@Url.Action("Index", "ClubCommunities")';
+                //window.history.back();
+            }
+            function goToEditPage(e) {
+                e.preventDefault();
+                var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                window.location.href = '@Url.Action("Edit", "ClubCommunities")' + '/' + dataItem.id;
+            }
+            function GetMyImage(image)
+            {
+                var returnString = 'No Image Found';
+
+                // just checking to see if we have a name for the image
+                if (image != null && image.length > 0) {
+                    returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                    return returnString;
+                } else
+                    return "";
+            }        
+
+        </script>
+    </div>
+</div>
+
+<script>
+
+    $(function() {
+        // The Name() of the Grid is used to get its client-side instance.
+        var SalesTalkAttachments = $("#SalesTalkAttachments").data("kendoGrid");
+    });
+
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

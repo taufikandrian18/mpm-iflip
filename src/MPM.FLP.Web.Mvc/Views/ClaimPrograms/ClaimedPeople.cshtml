@@ -1,0 +1,275 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.ClaimPrograms
+@{
+    ViewData["Title"] = "ClaimPrograms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header btn-">
+                <h2>
+                    Claim Programs @Model.Title Claimed By
+                </h2>
+            </div>
+            <div class="body">
+                <div class="form-group">
+
+                    <button id="backToIndex" class="btn btn-primary" onclick="BackToIndex()"><span class="glyphicon glyphicon-chevron-left"></span>Back</button>
+
+                    @*<button type="submit" value="Submit" class="btn btn-primary">Submit</button>*@
+                    @*<button asp-action="Index" class="btn btn-default">Kembali</button>*@
+                </div>
+
+                @(Html.Kendo().Grid<MPM.FLP.Services.Dto.ClaimerDto>()
+                              .Name("grid")
+                              .Excel(excel => excel
+                              .FileName("Claimed People - " + DateTime.Now + ".xlsx").AllPages(true)
+                              .Filterable(true)
+                              .ProxyURL(Url.Action("Excel_Export_Save", "ClaimPrograms")))
+                              .ToolBar(tools =>
+                              {
+                                  tools.Excel();
+                                  //tools.Custom().Text("Tambah Claimer Baru").HtmlAttributes(new { Href = Url.Action("CreateClaimer", "ClaimPrograms") });
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Custom()
+                                  .ServerFiltering(true)
+                                  .Type("aspnetmvc-ajax")
+                                  .Transport(transport => transport
+                                                .Read(read => read.Action(Model.Id.ToString(), "ClaimPrograms/Grid_Claimer_Read"))
+                                    //.Destroy(destroy => destroy.Action("Grid_Claimer_Destroy", "ClaimPrograms"))
+                                    )
+                                  .Schema(schema => schema
+                                    .Model(m => m.Id("id"))
+                                    .Parse(@<text>
+                                                function(response) {
+                                                return response.result;
+                                                }
+                                    </text>)
+                  .Data("data")
+                  .Total("total")
+                  )
+                )
+             .Columns(columns =>
+             {
+                 columns.Bound(typeof(string), "claimerUsername").Title("Username").Width(200);
+
+                 columns.Bound(typeof(string), "isApproved").ClientTemplate(
+           "#=ShowValue(data.isApproved)#")
+         .Title("Approved").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100);
+
+                 columns.Bound(typeof(string), "otp").Title("OTP").Width(100);
+
+                 columns.Bound(typeof(string), "isVerified").ClientTemplate(
+           "#=ShowValue(data.isVerified)#")
+         .Title("Verified").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(100);
+
+                 columns.Bound(typeof(DateTime), "verifiedTime").Title("Tanggal Verifikasi").ClientTemplate("#= data.verifiedTime ? kendo.toString(kendo.parseDate(data.verifiedTime), 'dd-MM-yyyy') : '' #").Width(140);
+
+                 columns.Bound(typeof(string), "storageUrl").ClientTemplate(
+                             "#=GetMyImage(data.storageUrl)#")
+                           .Title("Foto Bukti").Width(100);
+
+                 columns.Command(commands =>
+                                                            {
+                     commands.Custom("Approve").Text(" ").HtmlAttributes(new { @class = "btn btn-success", @style = "color:white;", @title = "Approve" }).IconClass("glyphicon glyphicon-ok-circle").Click("Approve");
+                     commands.Custom("Reject").Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Reject" }).IconClass("glyphicon glyphicon-ban-circle").Click("Reject");
+                 }).Title("Approval").Width(180);
+
+                 columns.Bound(typeof(string), "ShopName").Title("Nama Toko").Width(200);
+                 columns.Bound(typeof(string), "shopImageurl").ClientTemplate(
+                             "#=GetMyImage(data.shopImageurl)#")
+                           .Title("Foto Toko").Width(100);
+                 columns.Bound(typeof(string), "ktpImageUrl").ClientTemplate(
+                             "#=GetMyImage(data.ktpImageUrl)#")
+                           .Title("Foto KTP").Width(100);
+                 columns.Bound(typeof(string), "Address").Title("Address").Width(200);
+                 columns.Bound(typeof(string), "Longitude").Title("Longitude").Width(200);
+                 columns.Bound(typeof(string), "Latitude").Title("Latitude").Width(200);
+                 columns.Bound(typeof(string), "Email").Title("Email").Width(200);
+                 columns.Bound(typeof(string), "Handphone").Title("Handphone").Width(200);
+                 columns.Bound(typeof(string), "Jabatan").Title("Jabatan").Width(200);
+                 columns.Bound(typeof(string), "isKTPVerified").ClientTemplate(
+           "#=ShowValue(data.isKTPVerified)#")
+         .Title("KTP Verified").HtmlAttributes(new { @class = "text-center", @style = "width:50px;" }).Filterable(false).Width(120);
+                 columns.Bound(typeof(string), "userImageUrl").ClientTemplate(
+                             "#=GetMyImage(data.userImageUrl)#")
+                           .Title("Foto User").Width(100);
+                 columns.Bound(typeof(string), "kodeDealer").Title("Kode Dealer").Width(150);
+                 columns.Bound(typeof(string), "namaDealer").Title("Nama Dealer").Width(200);
+                 columns.Bound(typeof(string), "kotaDealer").Title("Kota Dealer").Width(150);
+                 columns.Bound(typeof(string), "idflp").Title("ID FLP").Width(100);
+             })
+          .Pageable()
+          .Sortable()
+          .Scrollable()
+          .Resizable(resize => resize.Columns(true))
+                )
+
+                <div id="myModal" class="modal">
+
+                    <img class="modal-content" id="img01">
+                    <div id="caption"></div>
+                    <span class="close">&times;</span>
+                </div>
+
+                <script>
+
+                    function ShowValue(value) {
+                        if (value == true) {
+                            return "<i class='glyphicon glyphicon-ok'/>";
+                        } else {
+                            return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    function Approve(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        var model = {
+                            id : dataItem.claimProgramClaimerId
+                        };
+
+                        if (dataItem.isVerified == false) {
+                            if (dataItem.isApproved) {
+                                alert("Claim sudah diterima");
+                            } else {
+                                if (confirm("Apakah anda yakin untuk menyetejui?")) {
+                                    abp.ui.setBusy();
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("ApproveClaim", "ClaimPrograms")',
+                                        data: model,
+                                        dataType: "json",
+                                        success: function (response) {
+                                            abp.ui.clearBusy();
+                                            window.location.href = '@Url.Action("ClaimedPeople", "ClaimPrograms", "@Model.Id")';
+                                        }
+                                    });
+                                }
+                            }
+                        } else {
+                            alert("Data tidak bisa dirubah karena sudah terverifikasi");
+                        }
+
+                    }
+                    function Reject(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        var model = {
+                            id : dataItem.claimProgramClaimerId
+                        };
+
+                        if (dataItem.isVerified == false) {
+                            if (dataItem.isApproved) {
+                                if (confirm("Data telah disetujui, apakah anda yakin untuk menggantinya menjadi ditolak?")) {
+                                    abp.ui.setBusy();
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("RejectClaim", "ClaimPrograms")',
+                                        data: model,
+                                        dataType: "json",
+                                        success: function (response) {
+                                            abp.ui.clearBusy();
+                                            window.location.href = '@Url.Action("ClaimedPeople", "ClaimPrograms", "@Model.Id")';
+                                        }
+                                    });
+                                }
+                            } else {
+                                if (confirm("Apakah anda yakin untuk menolak?")) {
+                                    abp.ui.setBusy();
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("RejectClaim", "ClaimPrograms")',
+                                        data: model,
+                                        dataType: "json",
+                                        success: function (response) {
+                                            abp.ui.clearBusy();
+                                            window.location.href = '@Url.Action("ClaimedPeople", "ClaimPrograms", "@Model.Id")';
+                                        }
+                                    });
+                                }
+                            }
+                        } else {
+                            alert("Data tidak bisa dirubah karena sudah terverifikasi");
+                        }
+
+                    }
+                    function goToClaimedPage(e) {
+                            window.location.href = '@Url.Action("Questions", "ClaimPrograms")' + '/' + e;
+                    }
+
+                    function goToEditPage(e) {
+                        e.preventDefault();
+                        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                        window.location.href = '@Url.Action("Edit", "ClaimPrograms")' + '/' + dataItem.id;
+                    }
+                    function GetMyImage(image)
+                    {
+                       var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                        if (image != null && image.length > 0) {
+                            returnString = "<img id='myImg' onclick='zoom(this)' class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                            return returnString;
+                        } else
+                            return "";
+                    }
+                    function BackToIndex() {
+                       window.location.href = '@Url.Action("Index", "ClaimPrograms")';
+                        //window.history.back();
+                    };
+
+                    function zoom(ele) {
+                        // Get the image and insert it inside the modal - use its "alt" text as a caption
+                        var modal = document.getElementById("myModal");
+
+                        //alert(modal.id);
+                        var modalImg = document.getElementById("img01");
+                        var captionText = document.getElementById("caption");
+                        modal.style.display = "block";
+                        modalImg.src = ele.src;
+                        captionText.innerHTML = ele.alt;
+
+                        //When the user clicks on image, close the modal
+                        modalImg.onclick = function () {
+                            modal.style.display = "none";
+                        }
+
+
+                        modal.onclick = function () {
+                            modal.style.display = "none";
+                        }
+
+                        // Get the <span> element that closes the modal
+                        var span = document.getElementsByClassName("close")[0];
+
+                        // When the user clicks on <span> (x), close the modal
+                        span.onclick = function () {
+                            modal.style.display = "none";
+                        }
+
+                    }
+
+                    $(document).ready(function () {
+                        $(".download").click(function () {
+                            var grid = $("#Grid").data("kendoGrid");
+                            var options = {
+                                format: $(this).data("format"),
+                                title: "DemoSheet"
+                            }
+                            $("#export-data").val(encodeURIComponent(JSON.stringify(options)));
+                            $("#export-model").val(encodeURIComponent(JSON.stringify(grid.columns)));
+                        });
+                    });
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>

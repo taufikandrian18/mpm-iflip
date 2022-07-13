@@ -1,0 +1,116 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.CSChampionClubs
+@{
+    ViewData["Title"] = "CSChampionClubsParticipants";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    CS Champion Clubs Participants
+                </h2>
+            </div>
+            <div class="body">
+                <div class="form-group">
+                    <button class="btn btn-default" onclick="backToIndex()" >Kembali</button>
+                </div>
+                <div class="row table-responsive">
+                    @(Html.Kendo().Grid<MPM.FLP.Web.Models.FLPMPM.CSChampionClubParticipantsVM>()
+                             .Name("grid")
+                             //.ToolBar(tools =>
+                             //{
+                             //    tools.Custom().Text("Tambah CS Champion Clubs Baru").HtmlAttributes(new { Href = Url.Action("Create", "CSChampionClubs") });
+                             //})
+                             .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .ServerFiltering(true)
+                                 .Type("aspnetmvc-ajax")
+                                 .Transport(transport => transport
+                                               .Read(read => read.Action("GridParticipant_Read", "CSChampionClubs", Model))
+                                               .Destroy(destroy => destroy.Action("GridParticipant_Destroy", "CSChampionClubs"))
+                                   )
+                                 .Schema(schema => schema
+                                   .Model(m => m.Id("id"))
+                                   .Parse(@<text>
+                                            function(response) {
+                                            return response.result;
+                                            }
+                                </text>)
+                    .Data("data")
+                    .Total("total")
+                    )
+                  )
+               .Columns(columns =>
+               {
+                   //columns.Bound(typeof(DateTime), "creationTime").Title("Tanggal").ClientTemplate("#= data.creationTime ? kendo.toString(kendo.parseDate(data.creationTime), 'dd-MM-yyyy') : '' #");
+                   columns.Bound(typeof(string), "idmpm").Title("ID MPM");
+                   columns.Bound(typeof(string), "name").Title("Nama");
+                   columns.Bound(typeof(string), "dealerName").Title("Dealer");
+                   //columns.Template("<button class='btn btn-warning waves-effect' onclick='goToEditPage(\"#=data.id#\")'><span class='glyphicon glyphicon-file'></span><span style='margin-left:10px;'>Tautan</span></button>").Width(20);
+                   columns.Command(commands =>
+                   {
+                       //commands.Custom("Edit").Text(" ").HtmlAttributes(new { @class = "btn btn-primary", @style = "color:white;", @title = "Ubah" }).IconClass("glyphicon glyphicon-cog").Click("goToEditPage");
+                       commands.Destroy().Text(" ").HtmlAttributes(new { @class = "btn btn-danger", @style = "color:white;", @title = "Hapus" }).IconClass("glyphicon glyphicon-trash");
+                   }).Width(100);
+               })
+                 .Pageable()
+                 .Sortable()
+
+                    )
+
+                    <script>
+                        function ShowValue(value) {
+                            if (value == true) {
+                                return "<i class='glyphicon glyphicon-ok'/>";
+                            } else {
+                                return "<i class='glyphicon glyphicon-remove'/>";
+                            }
+                        }
+                        function goToEditPage(e) {
+                            //var grid = $("#grid").data("kendoGrid");
+
+                            e.preventDefault();
+                            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+                            //var dataItem = grid.select().dataItem($(e.currentTarget).closest("tr"));
+
+                            window.location.href = '@Url.Action("Edit", "CSChampionClubs")' + '/' + dataItem.id;
+                            //window.location.href = '@Url.Action("Edit", "CSChampionClubs")' + '/' + e;
+                        }
+                        function goToParticipantPage(e) {
+                            window.location.href = '@Url.Action("Participant", "CSChampionClubs")' + '/' + e;
+                        }
+                        function goToAttachmentPage(e) {
+                            e.preventDefault();
+                            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                            window.location.href = '@Url.Action("EditAttachment", "CSChampionClubs")' + '/' + dataItem.id;
+                        }
+                        function GetMyImage(image)
+                        {
+                           var returnString = 'No Image Found';
+
+                                //just checking to see if we have a name for the image
+                            if (image != null && image.length > 0) {
+                                returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                                return returnString;
+                            } else
+                                return "";
+                        }
+                        function backToIndex() {
+                           window.location.href = '@Url.Action("Index", "CSChampionClubs")';
+                            //window.history.back();
+                        }
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

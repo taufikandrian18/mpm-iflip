@@ -1,0 +1,180 @@
+﻿@model MPM.FLP.FLPDb.ProductCatalogs
+
+@{
+    ViewData["Title"] = "Spesifikasi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Spesifikasi</h2>
+            </div>
+            <div class="body">
+                @if (!string.IsNullOrEmpty(ViewBag.message))
+                {
+                    <div class="alert bg-green alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        @ViewBag.message
+                    </div>
+                }
+            <form asp-action="Spesifikasi">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <label asp-for="Title" class="control-label">@Model.Title</label><br />
+                            <input asp-for="Title" hidden />
+                            <input asp-for="Order" hidden />
+                            <input asp-for="IsPublished" hidden />
+                            <input asp-for="FeaturedImageUrl" hidden />
+                            <input asp-for="CreatorUsername" hidden />
+                            <input asp-for="CreationTime" hidden />
+                            <input asp-for="ProductCategoryId" hidden />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="leftForm">
+                        <div class="form-group">
+                            <label asp-for="PanjangLebarTinggi" class="control-label">Panjang x Lebar x Tinggi</label><br />
+                            <input asp-for="PanjangLebarTinggi" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="JarakSumbuRoda" class="control-label">Jarak Sumbu Roda</label><br />
+                            <input asp-for="JarakSumbuRoda"  class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="JarakTerendahkeTanah" class="control-label">Jarak Terendah ke Tanah</label><br />
+                            <input asp-for="JarakTerendahkeTanah" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="BeratKosong" class="control-label">Berat Kosong</label><br />
+                            <input asp-for="BeratKosong" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="KapasitasTangkiBahanBakar" class="control-label">Kapasitas Tangki Bahan Bakar</label><br />
+                            <input asp-for="KapasitasTangkiBahanBakar" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeMesin" class="control-label">Tipe Mesin</label><br />
+                            <input asp-for="TipeMesin" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="VolumeLangkah" class="control-label">Volume Langkah</label><br />
+                            <input asp-for="VolumeLangkah" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="SistemPendingin" class="control-label">Sistem Pendingin</label><br />
+                            <input asp-for="SistemPendingin" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="SistemSuplaiBahanBakar" class="control-label">Sistem Suplai Bahan Bakar</label><br />
+                            <input asp-for="SistemSuplaiBahanBakar" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DiameterLangkah" class="control-label">Diameter x Langkah</label><br />
+                            <input asp-for="DiameterLangkah" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeTransmisi" class="control-label">Tipe Transmisi</label><br />
+                            <input asp-for="TipeTransmisi" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PerbandinganKompresi" class="control-label">Perbandingan Kompresi</label><br />
+                            <input asp-for="PerbandinganKompresi" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="DayaMaksimum" class="control-label">Daya Maksimum</label><br />
+                            <input asp-for="DayaMaksimum" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TorsiMaksimum" class="control-label">Torsi Maksimum</label><br />
+                            <input asp-for="TorsiMaksimum" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PolaPengoperanGigi" class="control-label">Pola Pengoperan Gigi</label><br />
+                            <input asp-for="PolaPengoperanGigi" class="k-textbox" class="k-textbox" style="width:100%" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="rightForm">
+                        <div class="form-group">
+                            <label asp-for="TipeStarter" class="control-label">Tipe Starter</label><br />
+                            <input asp-for="TipeStarter" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeKopling" class="control-label">Tipe Kopling</label><br />
+                            <input asp-for="TipeKopling" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="KapasitasMinyakPelumas" class="control-label">Kapasitas Minyak Pelumas</label><br />
+                            <input asp-for="KapasitasMinyakPelumas" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeRangka" class="control-label">Tipe Rangka</label><br />
+                            <input asp-for="TipeRangka" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="UkuranBanDepan" class="control-label">Ukuran Ban Depan</label><br />
+                            <input asp-for="UkuranBanDepan" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="UkuranBanBelakang" class="control-label">Ukuran Ban Belakang</label><br />
+                            <input asp-for="UkuranBanBelakang" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeRemDepan" class="control-label">Tipe Rem Depan</label><br />
+                            <input asp-for="TipeRemDepan" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeRemBelakang" class="control-label">Tipe Rem Belakang</label><br />
+                            <input asp-for="TipeRemBelakang" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeSuspensiDepan" class="control-label">Tipe Suspensi Depan</label><br />
+                            <input asp-for="TipeSuspensiDepan" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeSuspensiBelakang" class="control-label">Tipe Suspensi Belakang</label><br />
+                            <input asp-for="TipeSuspensiBelakang" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeBaterai" class="control-label">Tipe Baterai</label><br />
+                            <input asp-for="TipeBaterai" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="SistemPengapian" class="control-label">Sistem Pengapian</label><br />
+                            <input asp-for="SistemPengapian" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeBateraiAki" class="control-label">Tipe Baterai/Aki</label><br />
+                            <input asp-for="TipeBateraiAki" class="k-textbox" style="width:100%" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="TipeBusi" class="control-label">Tipe Busi </label><br />
+                            <input asp-for="TipeBusi" class="k-textbox" style="width:100%" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                            <button type="submit" value="Submit" class="btn btn-primary">Submit</button>
+                            <button asp-action="Index" class="btn btn-default">Kembali</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

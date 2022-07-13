@@ -1,0 +1,155 @@
+﻿@model MPM.FLP.FLPDb.InboxMessages
+
+@{
+    ViewData["Title"] = "View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>View Inbox Message </h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        @*@if ((string)TempData["alert"] != "" && TempData["alert"] != null)
+                        {
+                            <div class="alert bg-red alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                @TempData["alert"]
+                            </div>
+                        }*@
+                        @using (Html.BeginForm("Edit", "Inbox", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Title" class="control-label" >Judul</label><br />
+                                <input asp-for="Title" class="k-textbox" disabled style="width:100%" />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Title" class="control-label">Penerima</label><br />
+                                @(Html.Kendo().ListBox()
+                                    .Name("optional")
+                                    .TemplateId("user-item-template")
+                                    .DataSource(dataSource => dataSource
+                                     .Custom()
+                                     .ServerFiltering(true)
+                                     .Type("aspnetmvc-ajax")
+                                     .Transport(transport => transport
+                                                   .Read(read => read.Action("GetUsers", "Inbox", Model))
+                                                   )
+                                                 .Schema(schema => schema
+                                                   .Model(m => m.Id("id"))
+                                                   .Parse(@<text>
+                                                            function(response) {
+                                                            return response.result;
+                                                            }
+                                                </text>)
+                                       .Data("data")
+                                       .Total("total")
+                                       )
+                                     )
+                                 .DataTextField("nama")
+                                 .DataValueField("idmpm")
+                                 .HtmlAttributes(new { style = "width:400px; height:400px;" })
+                                 .BindTo(new List<MPM.FLP.Web.Models.FLPMPM.InternalUsersVM>())
+                                )
+                            </div>
+                                <script id="user-item-template" type="text/x-kendo-template">
+                                    <span class="k-state-default">#: data.idmpm # - #: data.nama #</span>
+                                </script>
+                            <div class="form-group">
+                                <label asp-for="Contents" class="control-label">Contents</label> <br />
+                                @(Html.Kendo().EditorFor(e => e.Contents)
+                                    .HtmlAttributes(new { style = "width:100%; height:440px;" })
+                                    .Tools(tools => tools
+                                      .Clear()
+                                      .Bold().Italic().Underline().Strikethrough()
+                                      .JustifyLeft().JustifyCenter().JustifyRight().JustifyFull()
+                                      .InsertUnorderedList().InsertOrderedList()
+                                      .Outdent().Indent()
+                                      //.Formatting()
+                                      //.CleanFormatting()
+                                      .FontName()
+                                      .FontSize()
+                                      .ForeColor().BackColor()
+                                  )
+                                )
+                                @Html.ValidationMessageFor(model => model.Contents)
+                                <span asp-validation-for="Contents" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                @(Html.Kendo().Grid<MPM.FLP.FLPDb.InboxAttachments>()
+                                     .Name("grid")
+                             .DataSource(dataSource => dataSource
+                                 .Custom()
+                                 .ServerFiltering(true)
+                                 .Type("aspnetmvc-ajax")
+                                 .Transport(transport => transport
+                                               .Read(read => read.Action("Grid_ReadAttachment", "Inbox", Model))
+                                   )
+                                 .Schema(schema => schema
+                                   .Model(m => m.Id("id"))
+                                   .Parse(@<text>
+                                            function(response) {
+                                                return response.result;
+                                            }
+                                             </text>)
+                                          .Data("data")
+                                          .Total("total")
+                                          )
+                                        )
+                                     .Columns(columns =>
+                                     {
+                                         columns.Bound(typeof(string), "title").Title("Nama");
+                                         columns.Bound(typeof(string), "storageUrl").Title("Url");
+                                     })
+                                  .Pageable()
+                                  .Sortable()
+                                )
+                            </div>
+                            <div class="form-group">
+                                <input type="button" id="btnBack" class="btn btn-default" onclick="backToIndex()" value="Kembali">
+                            </div>
+                        }
+
+                    </div>
+                    
+                </div>
+                @*<div class="form-group">
+                    <button type="button" id="btnSubmit" value="Create" class="btn btn-primary">Tambah</button>
+                    <button class="btn btn-default" onclick="backToIndex()">Kembali</button>
+                </div>*@
+            </div>
+            <div class="footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(function () {
+        $('#templateBtn').click(function () {
+            window.location.href = '@Url.Action("DownloadTemplate", "Inbox", Model)';
+        });
+
+    });
+
+    function backToIndex() {
+       window.location.href = '@Url.Action("Index", "Inbox")';
+        //window.history.back();
+    };
+
+    
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

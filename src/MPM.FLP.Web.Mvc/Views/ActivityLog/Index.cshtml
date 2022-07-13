@@ -1,0 +1,306 @@
+﻿@using Abp.Authorization.Users
+@using MPM.FLP.Web.Startup
+@model MPM.FLP.FLPDb.Articles
+@{
+    ViewData["Title"] = "Artikel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    Activity Log
+                </h2>
+            </div>
+            <div class="body">
+                <div class="row">
+                    <div class="form-group">
+                        
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        @using (Html.BeginForm("Search", "ActivityLog", FormMethod.Post, new { id = "formCreate", enctype = "multipart/form-data" }))
+                        {
+                            <div class="form-group">
+                                <label class="control-label">Year </label><br />
+                                <input type="number" min="0" id="txtYear" class="k-textbox" />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Month </label><br />
+                                <input type="number" min="1" max="12" id="txtMonth" class="k-textbox" />
+                                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Activity Type</label><br />
+                                @(Html.Kendo().DropDownList()
+                                  .Name("selection")
+                                  .BindTo(new List<string>() {
+                                      "Activity",
+                                      "Content"
+                                  })
+                                 //.HtmlAttributes(new { style = "width: 100%" })
+                                 .Value("Activity")
+                                )
+                            </div>
+                            <div class="form-group" style="display:none">
+                                <label class="control-label">Channel (for download all only)</label><br />
+                                @(Html.Kendo().DropDownList()
+                                  .Name("channel")
+                                  .BindTo(new List<string>() {
+                                      "H1",
+                                      "H2"
+                                  })
+                                 //.HtmlAttributes(new { style = "width: 100%" })
+                                 .Value("Channel")
+                                )
+                            </div>
+                            <div class="form-group">
+                                <input type="button" id="btnSearch" value="Search" class="btn btn-primary" />
+                                <input type="button" id="downloadBtn" class="btn btn-success" value="Download Excel" />
+                                <input type="button" id="downloadAll" class="btn btn-info" value="Download All" />
+                                <input type="button" id="downloadRegistered" class="btn btn-danger" value="Download Registered User" />
+                                <input type="button" id="btnReset" class="btn btn-warning" value="Reset">
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+                <div class="row table-responsive">
+
+
+                    <div id="grid"></div>
+
+                    <script id="detail-template" type="text/x-kendo-template">
+                        <button class="btn btn-primary" onclick="gotoDetail()"><span class="glyphicon glyphicon-cog"></span></button>
+                    </script>
+                    <script>
+                        $().ready(function () {
+                            setupKendoGridInitial();
+                        });
+
+                        function setupKendoGridInitial() {
+                            $("#grid").kendoGrid({
+                                dataSource: {
+                                    pageSize: 10
+                                },
+                                columns: [
+                                    { field: "contentTypeText", title: "Content Type" }
+                                    , { field: "activityType", title: "Activity Type" }
+                                    , { field: "contentId", title: "Content Id" }
+                                    , { field: "contentTitle", title: "Content Title" }
+                                    , { field: "count", title: "Count", filterable: false }
+                                    //, { field: "contentId", title: " ", template: kendo.template($("#detail-template").html()), filterable: false, width: 80 }
+                                    @*,{ command: [{
+                                        name: " ",
+                                        iconClass: "glyphicon glyphicon-cog",
+                                        click: function(e) {
+                                            // prevent page scroll position change
+                                            e.preventDefault();
+                                            // e.target is the DOM element representing the button
+                                            var tr = $(e.target).closest("tr"); // get the current table row (tr)
+                                            // get the data bound to the current table row
+                                            var data = this.dataItem(tr);
+                                            var search = true;
+
+                                            var parameter = { "year": $("#txtYear").val(), "month": $("#txtMonth").val()};
+
+                                            if (parameter.year == "" || parameter.year == null)
+                                                parameter.year = 0;
+                                            if (parameter.month == "" || parameter.month == null) {
+                                                parameter.month = 0;
+                                            } else {
+                                                if (parameter.year == 0) {
+                                                    search = false;
+                                                    alert("Tahun belum diisi");
+                                                }
+                                            }
+
+                                            if (search)
+                                                window.location.href = '@Url.Action("DetailGate", "ActivityLog")' + '?contentId=' + data.contentId + "&year=" + parameter.year + "&month=" + parameter.month;
+                                        }
+                                      }]
+                                    }*@
+                                ],
+                                sortable: true,
+                                filterable: {
+                                    extra: false,
+                                    operators: {
+                                        string: {
+                                            contains: "Contains"
+                                        }
+                                    }
+                                },
+                                pageable: true
+                            });
+
+                        }
+                        function gotoDetail(e) {
+                            e.preventDefault();
+                            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                            window.location.href = '@Url.Action("DetailInternal", "ActivityLog")' + '/' + dataItem.contentId;
+                        }
+
+                        function DownloadExcel(e) {
+                            window.location.href = '@Url.Action("DownloadExcel", "ActivityLog")';
+                        }
+                        $(document).ready(function () {
+
+                            $("#downloadBtn").click(function () {
+                                var search = true;
+
+                                var parameter = { "year": $("#txtYear").val(), "month": $("#txtMonth").val(), "selection": $("#selection").val()};
+
+                                if (parameter.year == "" || parameter.year == null)
+                                    parameter.year = 0;
+                                if (parameter.month == "" || parameter.month == null) {
+                                    parameter.month = 0;
+                                } else {
+                                    if (parameter.year == 0) {
+                                        search = false;
+                                        alert("Tahun belum diisi");
+                                    }
+                                }
+
+                                if (search) {
+                                    window.location.href = '@Url.Action("DownloadExcel", "ActivityLog")?year=' + $("#txtYear").val() + '&month=' + $("#txtMonth").val() + '&selection=' + $("#selection").val();
+                                }
+                            })
+
+                            $("#downloadAll").click(function () {
+                                var search = true;
+
+                                var parameter = { "year": $("#txtYear").val(), "month": $("#txtMonth").val(), "channel": $("#channel").val()};
+
+                                if (parameter.year == "" || parameter.year == null)
+                                    parameter.year = 0;
+                                if (parameter.month == "" || parameter.month == null) {
+                                    alert("Bulan belum diisi");
+                                } else {
+                                    if (parameter.year == 0) {
+                                        search = false;
+                                        alert("Tahun belum diisi");
+                                    }
+                                }
+
+                                if (search) {
+                                    window.location.href = '@Url.Action("DownloadAll", "ActivityLog")?year=' + $("#txtYear").val() + '&month=' + $("#txtMonth").val() + '&channel=' + $("#channel").val();
+                                }
+                            })
+
+                            $("#downloadRegistered").click(function () {
+                                var search = true;
+
+                                var parameter = { "year": $("#txtYear").val(), "month": $("#txtMonth").val(), "channel": $("#channel").val()};
+
+                                if (parameter.year == "" || parameter.year == null)
+                                    parameter.year = 0;
+                                if (parameter.month == "" || parameter.month == null) {
+                                    alert("Bulan Belum diisi");
+                                    search = false;
+                                } else {
+                                    if (parameter.year == 0) {
+                                        search = false;
+                                        alert("Tahun belum diisi");
+                                    }
+                                }
+
+                                if (search) {
+                                    window.location.href = '@Url.Action("DownloadRegisteredUser", "ActivityLog")?year=' + $("#txtYear").val() + '&month=' + $("#txtMonth").val();
+                                }
+                            })
+
+                            $("#btnSearch").click(function () {
+
+                                var search = true;
+
+                                var parameter = { "year": $("#txtYear").val(), "month": $("#txtMonth").val(), "selection": $("#selection").val()};
+
+                                if (parameter.year == "" || parameter.year == null)
+                                    parameter.year = 0;
+                                if (parameter.month == "" || parameter.month == null) {
+                                    parameter.month = 0;
+                                } else {
+                                    if (parameter.year == 0) {
+                                        search = false;
+                                        alert("Tahun belum diisi");
+                                    }
+                                }
+
+                                if (search) {
+                                    abp.ui.setBusy();
+                                    $.ajax({
+                                        url: '@Url.Action("Search", "ActivityLog")',
+                                        type: "GET",
+                                        data: parameter,
+                                        success: function (response) {
+
+                                            var grid = $("#grid").data("kendoGrid");
+
+                                            if (parameter.selection == "Activity") {
+                                                grid.hideColumn(2);
+                                                grid.hideColumn(3);
+                                            } else {
+                                                grid.showColumn(2);
+                                                grid.showColumn(3);
+
+                                            }
+
+                                           if (response.result.success)
+                                                grid.dataSource.data(response.result.item);
+                                            else
+                                                alert("Data tidak ditemukan");
+
+                                            abp.ui.clearBusy();
+                                            @*if (response.result.success) {
+                                                alert("Data berhasil dimasukkan");
+                                                window.location.href = '@Url.Action("Index", "MasterMenuPoint")';
+                                            }
+                                            else {
+                                                alert("Content type sudah terdapat pada database");
+                                            }*@
+                                        }
+                                    });
+                                }
+
+                            })
+
+                            $("#btnReset").click(function () {
+                                $("#txtYear").val("");
+                                $("#txtMonth").val("");
+                                $("#selection").data("kendoDropDownList").value("Activity");
+                                $("#grid").data("kendoGrid").dataSource.data([]);
+                            })
+                        });
+
+                        function GetMyImage(image)
+                        {
+                            var returnString = 'No Image Found';
+
+                            //just checking to see if we have a name for the image
+                            if(image != null && image.length > 0)
+                            {
+                                returnString = "<img class='image img-responsive' src=" + image + " title=" + image + " width='100' height='100' alt=" + image + " />";
+                                return returnString;
+                            } else
+                            return "";
+                        }
+                        function ShowValue(value) {
+                            if (value == true) {
+                                return "<i class='glyphicon glyphicon-ok'/>";
+                            } else {
+                                return "<i class='glyphicon glyphicon-remove'/>";
+                        }
+                    }
+                    </script>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
